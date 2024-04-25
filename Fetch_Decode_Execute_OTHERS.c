@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-char registers[31][32];
+char registers[31][33];
 void initRegisters(){
 for (int i = 0; i < 31; i++) {
    strcpy(registers[i], "0000000000000000000000000000000");
@@ -21,7 +21,7 @@ void incrementProgramCounter(char *programCounter) {
 int main(){
 
 initRegisters();
-strcpy(memmory[0], "000011001001101010100111111111");
+strcpy(memmory[0], "0000110010011010101001111111111");
 while (1)
 {
    memmoryAdressRegister=strtol(programCounter,NULL, 2);
@@ -31,7 +31,7 @@ while (1)
    printf("instructionRegister: %s\n",instructionRegister);
    char opcode[5]; // Room for 4 characters and the null terminator
    strncpy(opcode, instructionRegister, 4);
-   opcode[4] = '\0'; // Ensure null-termination
+   opcode[5] = '\0'; // Ensure null-termination
    char flag;
    int opcodeInt = strtol(opcode,NULL, 2);
    switch (opcodeInt)
@@ -72,22 +72,23 @@ while (1)
     case 11:
    flag = 'I';
     break;
-   
+
    default:
     break;
    }
-     
+for (int i = 0; i <= 4; i++) {
+    printf("instruction: %c\n",opcode[i]);
+}
      if(flag=='R')
      {
-        for (int i = 5; i <= 9; i++) {
-                printf("instruction: %c\n",instructionRegister[i]);
-           registers[0][22+i]=instructionRegister[i];
-           registers[1][22+i]=instructionRegister[i+5];
-           registers[2][22+i]=instructionRegister[i+10];
-           for (int i=0; i < 3; i++)
-    {
-        printf("Register %i :%s\n",i,registers[i]);
-    }
+        int j=27;
+        for (int i = 4; i < 9; i++) {
+               // printf("instruction: %c\n",instructionRegister[i]);
+           registers[0][j]=instructionRegister[i];
+           registers[1][j]=instructionRegister[i+5];
+           registers[2][j]=instructionRegister[i+10];
+           j++;
+          
             }
      }
 
@@ -116,23 +117,30 @@ while (1)
     printf("programCounter: %s\n",programCounter);
     printf("flag: %c\n",flag); 
     printf("Instruction: %s\n",instructionRegister);
-    int length = sizeof(registers) / sizeof(registers[0]);
-    for (int i=0; i < 3; i++)
-    {
-        printf("Register %i :%c\n",i,registers[0][33]);
+    //printf("%zu",sizeof(registers[0]));
+  //  printf("Register 0: %s\n", registers[0][35]);
+  
+    for (int i = 0; i < 33; ++i) {
+         registers[i][32] = '\0';
     }
-    
+    //  for (int i=0; i < 3; i++)
+    // {
+    //     printf("Register %i :%s\n",i,registers[i]);
+    // }
+    // for(int i=0; i<32; i++){
+    // printf("Instruction: %c\n",instructionRegister[i]);
+    // }
+    int R1 = strtol(registers[0],NULL, 2);
+    printf("The binary string \"%s\"   is: %d\n", registers[0], R1);
+     int R2 = strtol(registers[1],NULL, 2);
+    printf("The binary string \"%s\"  is: %d\n", registers[1], R2);
+     int R3 = strtol(registers[2],NULL, 2);
+    printf("The binary string \"%s\"  is: %d\n", registers[2], R3);
     break;
 }
 
 
 
 }
-
-
-
-
-
-
 
 
