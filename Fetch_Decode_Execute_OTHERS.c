@@ -4,9 +4,10 @@
 int registers[32];
 int programCounter=0;
 char memory[2048][33];
-char memoryDataRegister[33];
-int memoryAdressRegister;
-char instructionRegister[33]="00000000000000000000000000000000";
+int memoryDataRegister;
+int temporayRegister;
+// int memoryAdressRegister;
+char instructionRegister[33];
 int numberofinstructions;
 int cycle=0;
 int opcodeInt;
@@ -17,6 +18,12 @@ int reg3;
 int imm_value;
 int shamt;
 int address;
+int numofcycles;
+int states[]={-1,-1,-1,-1,-1};
+int decodecycle=1;
+int executeCycle=1;
+int result;
+
 
 
 int binaryToDecimal(char *binary) {
@@ -53,7 +60,9 @@ int binaryToDecimal(char *binary) {
     
 
     void fetch(){
+
         strcpy(instructionRegister,memory[programCounter]); 
+        states[0]=programCounter;
     }
 
     void decode(){
@@ -145,12 +154,12 @@ int binaryToDecimal(char *binary) {
         
 
             }
+            decodecycle=0;
 
     }
 
 
         void execute(){
-            int result;
         if(opcodeInt==0){  //exec of add operation
             int v1=registers[reg2];
             int v2=registers[reg3];
@@ -243,23 +252,68 @@ int binaryToDecimal(char *binary) {
         }
 
         
-
+       executeCycle=0;
         }
-
-        void execProgram(){
-        cycle++;
-        printf("Clock cycle number %d\n",cycle);
-        if(cycle%2==1 && numberofinstructions>0){
+void execProgram(){
+    printf("Clock cycle number %d\n",cycle);
+       while(1){
+       if(cycle%2==1 && numberofinstructions>0){
             fetch();
             numberofinstructions--;
              }
+              
 
+         if(states[4]!=-1)
+            // writeBack();
+            printf("Write back stage\n");
+         if(states[3]!=-1)
+            // memoryAccess();
+            printf("Memory access stage\n");
+        if(states[2]!=-1 && executeCycle==1)
+            {execute();
+            printf("Execute stage\n");}
+         else{
+             executeCycle=1;       
+         } 
+        if(states[1]!=-1 && decodecycle==1)
+            {decode();
+            printf("Decode stage\n");} 
+            else{
+                decodecycle=1;
+            }
+             
+        for(int i = 4; i > 0; i--) {
+            states[i] = states[i-1];
+                    }
          
+         cycle++;
+        
+       
+       }
+       
+       
 
         }
 
 
 int main(){
+    char line[33];
+
+    FILE *file = fopen("Output.txt", "r");
+    if (file == NULL) {
+        printf("Failed to open file\n");
+        return;
+    }
+
+    while (fgets(line, sizeof(line), file)) 
+        numberofinstructions++;
+    while (fgets(line, sizeof(line), file)) {
+        strcpy(instructionRegister, line);
+        // decode & execute
+    }
+        
+    
+    
 
 // initRegisters();
 // strcpy(memory[0], "01111100100110101010011111111111");

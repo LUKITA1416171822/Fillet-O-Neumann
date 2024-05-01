@@ -5,6 +5,7 @@
 FILE *file;
 char tmp[33];
 char result[33];
+int numberOfInstructions = 0;
 
 void regToBin(char str[]){ 
     tmp[0] = '\0';
@@ -199,7 +200,7 @@ void parse() {
     }
 
     while (fgets(line, sizeof(line), file)) {
-        
+        numberOfInstructions++;
         int c = 0;
         for(int i = 0; i < strlen(line); i++) {
             if(line[i] == ' ') {
@@ -235,7 +236,7 @@ void parse() {
 
         printf("%s\n", result);
 
-        fprintf(outputFile, "%s\n", result);
+        
 
         result[0] = '\0';
     }
@@ -248,7 +249,7 @@ void parse() {
 int main() {
 
     parse();
-
+    printf(numberOfInstructions);
     
     return 0;
 }
