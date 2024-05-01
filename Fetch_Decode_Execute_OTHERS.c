@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 int registers[32];
-const int ZeroRegister = 0;
 int programCounter=0;
 char memory[2048][33];
 char memoryDataRegister[33];
@@ -41,17 +40,6 @@ int binaryToDecimal(char *binary) {
     return decimal;
 }
 
-// void incrementProgramCounter(char *programCounter) {
-//     long int value = strtol(programCounter, NULL, 2); // Convert binary string to integer
-//     value++; // Increment the integer
-//     sprintf(programCounter, "%032ld", value); // Convert the integer back to a binary string
-// }
-
-void initRegisters(){
-for (int i = 0; i < 31; i++) {
-   strcpy(registers[i], "0000000000000000000000000000001");
-}
-}
 
  void intToBinary(int n, char *str, int str_size) {
     str[str_size-1] = '\0';
@@ -65,8 +53,7 @@ for (int i = 0; i < 31; i++) {
     
 
     void fetch(){
-        int pc=strtol(programCounter,NULL,2);
-        strcpy(instructionRegister,memory[pc]); 
+        strcpy(instructionRegister,memory[programCounter]); 
     }
 
     void decode(){
@@ -131,14 +118,11 @@ for (int i = 0; i < 31; i++) {
         strncpy(temp3,instructionRegister+14,5);
         strncpy(temp4,instructionRegister+19,13);
         
-        int reg1=strtol(temp1,NULL, 2);
-        int reg2=strtol(temp2,NULL, 2);
-        int reg3=strtol(temp3,NULL, 2);
-        int shamt=strtol(temp4,NULL, 2);
+        int reg1=binaryToDecimal(temp1);
+        int reg2=binaryToDecimal(temp2);
+        int reg3=binaryToDecimal(temp3);
+        int shamt=binaryToDecimal(temp4);
 
-
-
-        
 
 
 
@@ -154,8 +138,8 @@ for (int i = 0; i < 31; i++) {
        strncpy(temp2,instructionRegister+9,5);
        strncpy(imm,instructionRegister+14,18);
         
-        reg1=strtol(temp1,NULL, 2);
-        reg2=strtol(temp2,NULL, 2);
+        reg1=binaryToDecimal(temp1);
+        reg2=binaryToDecimal(temp2);
         imm_value=binaryToDecimal(imm);
        
         
@@ -201,9 +185,7 @@ for (int i = 0; i < 31; i++) {
             int v1=registers[reg1];
             int v2=registers[reg2];
             if(v1==v2){
-                 int pc =strtol(programCounter,NULL,2);
-                 pc=pc+1+imm_value;
-                intToBinary(pc,programCounter,33); // should be in write back
+                 programCounter=programCounter+imm_value; //should be in write back
                 }
 
         }
@@ -226,12 +208,13 @@ for (int i = 0; i < 31; i++) {
 
         }
 
-        // if(opcodeInt==7){   //exec of JMP operation
-        //     char newpc[]="00000000000000000000000000000000";
-        //     strncpy(address,instructionRegister+4,28);
-        //     strncpy(programCounter+4,address,28);   // should be in write back stage
+        if(opcodeInt==7){   //exec of JMP operation
+            char newpc[]="00000000000000000000000000000000";
+            intToBinary(programCounter,newpc,33);
+            strncpy(newpc+4,instructionRegister+4,28);
+            programCounter=binaryToDecimal(newpc); // should be in write back stage
             
-        // }
+         }
         if(opcodeInt==8){   //exec of LSL operation
             result=reg2<<shamt;
             registers[reg1]=result;  // should be in write back stage
@@ -247,7 +230,7 @@ for (int i = 0; i < 31; i++) {
             int v1=registers[reg2];
             int v2=imm_value;
             int v3=v1+v2;
-            result=strtol(memory[v3],NULL,2);    //should be in memory access stage
+            result=binaryToDecimal(memory[v3]);    //should be in memory access stage
             registers[reg1]=result;  // should be in write back stage
 
         }
@@ -256,7 +239,7 @@ for (int i = 0; i < 31; i++) {
             int v2=registers[reg2];
             int v3=imm_value;
             int v4=v2+v3;
-            intToBinary(v1,memory[v4],33);   //should be in memory access stage
+            intToBinary(v1,memory[v4],33); // not sure if handles negative numbers  //should be in memory access stage  
         }
 
         
