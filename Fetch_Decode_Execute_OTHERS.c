@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-char registers[31][33];
+int registers[32];
 const int ZeroRegister = 0;
-char programCounter[]="00000000000000000000000000000000";
+int programCounter=0;
 char memory[2048][33];
 char memoryDataRegister[33];
 int memoryAdressRegister;
@@ -19,11 +19,33 @@ int imm_value;
 int shamt;
 int address;
 
-void incrementProgramCounter(char *programCounter) {
-    long int value = strtol(programCounter, NULL, 2); // Convert binary string to integer
-    value++; // Increment the integer
-    sprintf(programCounter, "%032ld", value); // Convert the integer back to a binary string
+
+int binaryToDecimal(char *binary) {
+    int decimal = 0;
+    int size = strlen(binary);
+    int base = 1;
+
+    for(int i=size-1; i>=0; i--) {
+        if(binary[i] == '1') {
+            decimal += base;
+            printf("%d\n",decimal);
+        }
+        base = base * 2;
+    }
+
+    // If the number is negative (starts with 1 in 2's complement)
+    if(binary[0] == '1') {
+        decimal = decimal - base;
+    }
+
+    return decimal;
 }
+
+// void incrementProgramCounter(char *programCounter) {
+//     long int value = strtol(programCounter, NULL, 2); // Convert binary string to integer
+//     value++; // Increment the integer
+//     sprintf(programCounter, "%032ld", value); // Convert the integer back to a binary string
+// }
 
 void initRegisters(){
 for (int i = 0; i < 31; i++) {
@@ -134,7 +156,7 @@ for (int i = 0; i < 31; i++) {
         
         reg1=strtol(temp1,NULL, 2);
         reg2=strtol(temp2,NULL, 2);
-        imm_value=strtol(imm,NULL, 2);
+        imm_value=binaryToDecimal(imm);
        
         
 
@@ -146,38 +168,38 @@ for (int i = 0; i < 31; i++) {
         void execute(){
             int result;
         if(opcodeInt==0){  //exec of add operation
-            int v1=strtol(registers[reg2],NULL,2);
-            int v2=strtol(registers[reg3],NULL,2);
+            int v1=registers[reg2];
+            int v2=registers[reg3];
             result=v1+v2;
-            intToBinary(result,registers[reg1],33); //should be in write back
+            registers[reg1]=result;
 
         }
 
         if(opcodeInt==1){  //exec of sub operation
-            int v1=strtol(registers[reg1],NULL,2);
+            int v1=registers[reg1];
             int v2=imm_value;
             result=v1-v2;
-            intToBinary(result,registers[reg1],33); // should be in write back
+            registers[reg1]=result;// should be in write back
 
         }
 
         if(opcodeInt==2){  //exec of mul operation
-            int v1=strtol(registers[reg2],NULL,2);
-            int v2=strtol(registers[reg3],NULL,2);
+            int v1=registers[reg2];
+            int v2=registers[reg3];
             result=v1*v2;
-            intToBinary(result,registers[reg1],33); // should be in write back
+            registers[reg1]=result;// should be in write back
 
         }
 
         if(opcodeInt==3){  //exec of MOVI operation
             result=imm_value;
-            intToBinary(result,registers[reg1],33); // should be in write back
+            registers[reg1]=result;// should be in write back
 
         }
 
         if(opcodeInt==4){  //exec of JEQ operation
-            int v1=strtol(registers[reg1],NULL,2);
-            int v2=strtol(registers[reg2],NULL,2);
+            int v1=registers[reg1];
+            int v2=registers[reg2];
             if(v1==v2){
                  int pc =strtol(programCounter,NULL,2);
                  pc=pc+1+imm_value;
@@ -187,51 +209,51 @@ for (int i = 0; i < 31; i++) {
         }
 
         if(opcodeInt==5){  //exec of and operation
-            int v1=strtol(registers[reg2],NULL,2);
-            int v2=strtol(registers[reg3],NULL,2);
+            int v1=registers[reg2];
+            int v2=registers[reg3];
             result=v1&v2;
-            intToBinary(result,registers[reg1],33); // should be in write back
+            registers[reg1]=result; // should be in write back
 
         }
         
 
         if(opcodeInt==6){  //exec of XORI operation
-            int v1=strtol(registers[reg2],NULL,2);
+            int v1=registers[reg2];
             int v2=imm_value;
             result=v1^v2;
            
-            intToBinary(result,registers[reg1],33); // should be in write back stage
+            registers[reg1]=result; // should be in write back stage
 
         }
 
-        if(opcodeInt==7){   //exec of JMP operation
-            char address[]="0000000000000000000000000000";
-            strncpy(address,instructionRegister+4,28);
-            strncpy(programCounter+4,address,28);   // should be in write back stage
+        // if(opcodeInt==7){   //exec of JMP operation
+        //     char newpc[]="00000000000000000000000000000000";
+        //     strncpy(address,instructionRegister+4,28);
+        //     strncpy(programCounter+4,address,28);   // should be in write back stage
             
-        }
+        // }
         if(opcodeInt==8){   //exec of LSL operation
             result=reg2<<shamt;
-            intToBinary(result,registers[reg1],33);  // should be in write back stage
+            registers[reg1]=result;  // should be in write back stage
             
         }
         if(opcodeInt==9){   //exec of LSR operation
             result=reg2>>shamt;
-            intToBinary(result,registers[reg1],33);  // should be in write back stage
+            registers[reg1]=result;  // should be in write back stage
             
         }
 
          if(opcodeInt==10){  //exec of MOVR operation
-            int v1=strtol(registers[reg2],NULL,2);
+            int v1=registers[reg2];
             int v2=imm_value;
             int v3=v1+v2;
             result=strtol(memory[v3],NULL,2);    //should be in memory access stage
-            intToBinary(result,registers[reg1],33);  // should be in write back stage
+            registers[reg1]=result;  // should be in write back stage
 
         }
          if(opcodeInt==11){  //exec of MOVM operation
-            int v1=strtol(registers[reg1],NULL,2);
-            int v2=strtol(registers[reg2],NULL,2);
+            int v1=registers[reg1];
+            int v2=registers[reg2];
             int v3=imm_value;
             int v4=v2+v3;
             intToBinary(v1,memory[v4],33);   //should be in memory access stage
@@ -256,12 +278,15 @@ for (int i = 0; i < 31; i++) {
 
 int main(){
 
-initRegisters();
-strcpy(memory[0], "01111100100110101010011111111111");
-fetch();
-decode();
-execute();
-printf("%s\n",programCounter);
+// initRegisters();
+// strcpy(memory[0], "01111100100110101010011111111111");
+// fetch();
+// decode();
+// execute();
+// printf("%s\n",programCounter);
+
+int s= binaryToDecimal("11110110");
+printf("%d\n",s);
 // char address[]="0000000000000000000000000000";
 //             strncpy(address,instructionRegister+4,28);
 //             strncpy(programCounter+4,address,28);
