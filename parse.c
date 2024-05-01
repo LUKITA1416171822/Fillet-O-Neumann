@@ -146,7 +146,9 @@ void convert(char chars[][33]) {
         regToBin(chars[2]);
         strcat(R2, tmp);
         strcat(shamt, numToBin13(chars[3]));
-        strcat(result, strcat(opcode,strcat(R1,strcat(R2,shamt))));
+        char tmp1[33] = "00000";
+        strcat(tmp1, shamt);
+        strcat(result, strcat(opcode,strcat(R1,strcat(R2,tmp1))));
     } 
     else if (strcmp(chars[0], "LSR") == 0) {
         strcat(opcode, "1001");
@@ -155,7 +157,9 @@ void convert(char chars[][33]) {
         regToBin(chars[2]);
         strcat(R2, tmp);
         strcat(shamt, numToBin13(chars[3]));
-        strcat(result, strcat(opcode,strcat(R1,strcat(R2,shamt))));
+        char tmp1[33] = "00000";
+        strcat(tmp1, shamt);
+        strcat(result, strcat(opcode,strcat(R1,strcat(R2,tmp1))));
     } 
     else if (strcmp(chars[0], "MOVR") == 0) {
         strcat(opcode, "1010");
@@ -185,6 +189,12 @@ void parse() {
     file = fopen("Assembly.txt", "r");
     if (file == NULL) {
         printf("Failed to open file\n");
+        return;
+    }
+
+    FILE *outputFile = fopen("Output.txt", "w");
+    if(outputFile == NULL) {
+        printf("Could not open file Output.txt\n");
         return;
     }
 
@@ -224,9 +234,14 @@ void parse() {
         convert(chars);
 
         printf("%s\n", result);
+
+        fprintf(outputFile, "%s\n", result);
+
+        result[0] = '\0';
     }
 
     fclose(file);
+    fclose(outputFile);
 }
 
 
