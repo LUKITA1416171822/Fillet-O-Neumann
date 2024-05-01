@@ -182,7 +182,7 @@ void convert(char chars[][33]) {
 void parse() {
     char line[256];
 
-    file = fopen("lab1.txt", "r");
+    file = fopen("Assembly.txt", "r");
     if (file == NULL) {
         printf("Failed to open file\n");
         return;
