@@ -246,10 +246,3 @@ void parse() {
 }
 
 
-int main() {
-
-    parse();
-    printf(numberOfInstructions);
-    
-    return 0;
-}
