@@ -7,7 +7,6 @@ char memory[2048][33];
 int memoryDataRegister;
 int memoryAdressRegister;
 int temporayRegister;
-// int memoryAdressRegister;
 char instructionRegister[33];
 int numberofinstructions;
 int cycle=0;
@@ -24,6 +23,8 @@ int states[]={-1,-1,-1,-1,-1};
 int decodecycle=1;
 int executeCycle=1;
 int result;
+int memoryAccessOn=0;
+int writeBackOn=0;
 
 
 
@@ -173,7 +174,8 @@ int binaryToDecimal(char *binary) {
             int v1=registers[reg1];
             int v2=imm_value;
             result=v1-v2;
-            temporayRegister=reg1;// should be in write back
+            temporayRegister=reg1;
+            writeBackOn=1;
 
         }
 
@@ -181,13 +183,16 @@ int binaryToDecimal(char *binary) {
             int v1=registers[reg2];
             int v2=registers[reg3];
             result=v1*v2;
-           temporayRegister=reg1;// should be in write back
+           temporayRegister=reg1;
+           writeBackOn=1;
+
 
         }
 
         if(opcodeInt==3){  //exec of MOVI operation
             result=imm_value;
-            temporayRegister=reg1;// should be in write back
+            temporayRegister=reg1;
+            writeBackOn=1;
 
         }
 
@@ -195,7 +200,7 @@ int binaryToDecimal(char *binary) {
             int v1=registers[reg1];
             int v2=registers[reg2];
             if(v1==v2){
-                 programCounter=programCounter+imm_value; //should be in write back
+                 programCounter=programCounter+imm_value; //should this be in write back ?
                 }
 
         }
@@ -204,7 +209,8 @@ int binaryToDecimal(char *binary) {
             int v1=registers[reg2];
             int v2=registers[reg3];
             result=v1&v2;
-            temporayRegister=reg1; // should be in write back
+            temporayRegister=reg1; 
+            writeBackOn=1;
 
         }
         
@@ -214,7 +220,8 @@ int binaryToDecimal(char *binary) {
             int v2=imm_value;
             result=v1^v2;
            
-            temporayRegister=reg1; // should be in write back stage
+            temporayRegister=reg1; 
+            writeBackOn=1;
 
         }
 
@@ -222,26 +229,30 @@ int binaryToDecimal(char *binary) {
             char newpc[]="00000000000000000000000000000000";
             intToBinary(programCounter,newpc,33);
             strncpy(newpc+4,instructionRegister+4,28);
-            programCounter=binaryToDecimal(newpc); // should be in write back stage
+            programCounter=binaryToDecimal(newpc); // should be in write back stage ?
             
          }
         if(opcodeInt==8){   //exec of LSL operation
             result=reg2<<shamt;
-           temporayRegister=reg1;  // should be in write back stage
+           temporayRegister=reg1;  
+           writeBackOn=1;
             
         }
         if(opcodeInt==9){   //exec of LSR operation
             result=reg2>>shamt;
-            temporayRegister=reg1; // should be in write back stage
+            temporayRegister=reg1;
+            writeBackOn=1;
             
         }
 
          if(opcodeInt==10){  //exec of MOVR operation
             int v1=registers[reg2];
             int v2=imm_value;
-            int v3=v1+v2;
-            result=binaryToDecimal(memory[v3]);    //should be in memory access stage
-            temporayRegister=reg1;  // should be in write back stage
+            memoryAdressRegister=v1+v2;
+            temporayRegister=reg1;  
+            memoryAccessOn=1;
+            writeBackOn=1;
+
 
         }
          if(opcodeInt==11){  //exec of MOVM operation
@@ -249,21 +260,26 @@ int binaryToDecimal(char *binary) {
             int v2=registers[reg2];
             int v3=imm_value;
             memoryAdressRegister=v2+v3;
+            memoryAccessOn=1;
+            writeBackOn=1;
             
         }
 
         
        executeCycle=0;
         }
-void writeBack(){
-registers[temporayRegister]=result;
+        void writeBack(){
+        registers[temporayRegister]=result;
+        writeBackOn=0;
 
-}
-void memoryAccess(){
-    
-        intToBinary(registers[temporayRegister],memory[memoryAdressRegister],33); // not sure if handles negative numbers  //should be in memory access stage  ;
-        
-}
+
+        }
+        void memoryAccess(){
+            
+                intToBinary(registers[temporayRegister],memory[memoryAdressRegister],33); // not sure if handles negative numbers 
+                memoryAccessOn=0;
+        }
+
 void execProgram(){
     printf("Clock cycle number %d\n",cycle);
        while(1){
@@ -273,12 +289,15 @@ void execProgram(){
              }
               
 
-         if(states[4]!=-1)
-            writeBack();
-            printf("Write back stage\n");
-         if(states[3]!=-1)
-            memoryAccess();
+         if(states[4]!=-1){
+         printf("Write back stage\n");
+            if(writeBackOn==1)
+            writeBack();}
+            
+         if(states[3]!=-1){
             printf("Memory access stage\n");
+            if(memoryAccessOn==1)
+                memoryAccess();}
         if(states[2]!=-1 && executeCycle==1)
             {execute();
             printf("Execute stage\n");}
@@ -332,8 +351,6 @@ int main(){
 // execute();
 // printf("%s\n",programCounter);
 
-int s= binaryToDecimal("11110110");
-printf("%d\n",s);
 // char address[]="0000000000000000000000000000";
 //             strncpy(address,instructionRegister+4,28);
 //             strncpy(programCounter+4,address,28);
@@ -378,4 +395,3 @@ printf("%d\n",s);
 
 
 }
-
