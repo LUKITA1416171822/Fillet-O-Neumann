@@ -66,6 +66,7 @@ int binaryToDecimal(char *binary) {
     void fetch(){
 
         strcpy(instructionRegister,memory[programCounter]); 
+        printf("instructionRegister: %s\n",instructionRegister);
         states[0]=programCounter;
     }
 
@@ -285,12 +286,12 @@ int binaryToDecimal(char *binary) {
             executeCycle=1;
             }
         }
+ 
         void writeBack(){
-        registers[temporayRegister]=result;
-        writeBackOn=0;
-
-
+            registers[temporayRegister]=result;
+            writeBackOn=0;
         }
+
         void memoryAccess(){
             
                 intToBinary(registers[temporayRegister],memory[memoryAdressRegister],33); // not sure if handles negative numbers 
@@ -299,51 +300,62 @@ int binaryToDecimal(char *binary) {
 
 void execProgram(){
     parse();
-    printf("Clock cycle number %d\n",cycle);
-       while(1){       
 
-         if(states[4]!=-1){
-         printf("Write back stage\n");
+    for(int i = 0; i < 20; i++) 
+        if(memory[i][0] != '\0')
+            numberofinstructions++;
+    
+    while(1){       
+        printf("\nClock cycle number %d\n",cycle);
+
+        if(states[4]!=-1){
+            printf("Write back stage\n");
             if(writeBackOn==1)
-            writeBack();}
+                writeBack();
+        }
             
-         if(states[3]!=-1){
+        if(states[3]!=-1){
             printf("Memory access stage\n");
             if(memoryAccessOn==1)
                 memoryAccess();}
-        if(states[2]!=-1 )
-            {execute();
+        if(states[2]!=-1 ){
+            execute();
             printf("Execute stage\n");}
         if(states[1]!=-1 )
             {decode();
             printf("Decode stage\n");} 
-            
-    if(cycle%2==1 && numberofinstructions>0){
+        
+        printf("numberofinstruction: %i\n",numberofinstructions);
+        if(cycle%2==0 && numberofinstructions>0){
+            printf("Fetch stage\n");
             fetch();
             numberofinstructions--;
             programCounter++;
-             }
+        }
   
-        if( states[0]==-1 && states[1]==-1 && states[2]==-1 && states[3]==-1 && states[4]==-1)
+        if( states[0]==-1 && states[1]==-1 && states[2]==-1 && states[3]==-1 && states[4]==-1){
+            printf("Breaked\n");
             break;
+        }
             
 
         for(int i = 4; i > 0; i--) {
             states[i] = states[i-1];
-                    }
+        }
          
 
          cycle++;
         
        
-       }
+    }
        
        
 
-        }
+}
 
 
 int main(){
+    
     execProgram();
     // char line[33];
     //  printf("Enter the number of instructions\n");

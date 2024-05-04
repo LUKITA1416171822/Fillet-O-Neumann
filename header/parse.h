@@ -235,7 +235,7 @@ void parse() {
         
         convert(chars);
 
-        printf("%s\n", resultString);
+        
 
         strcpy(memory[numberOfInstructions-1], resultString);
 
