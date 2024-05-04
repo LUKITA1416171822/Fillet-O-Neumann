@@ -63,7 +63,10 @@ int binaryToDecimal(char *binary) {
     
 
     void fetch(){
-
+        printf("programCounter: %d\n",programCounter);
+        printf("memory[programCounter] %s\n",memory[programCounter]);
+        printf("instructionRegister: %s\n",instructionRegister);
+        if(cycle!=19)
         strcpy(instructionRegister,memory[programCounter]); 
         printf("instructionRegister: %s\n",instructionRegister);
         states[0]=programCounter;
