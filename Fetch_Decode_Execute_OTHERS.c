@@ -38,7 +38,6 @@ int binaryToDecimal(char *binary) {
     for(int i=size-1; i>=0; i--) {
         if(binary[i] == '1') {
             decimal += base;
-            printf("%d\n",decimal);
         }
         base = base * 2;
     }
@@ -83,40 +82,40 @@ int binaryToDecimal(char *binary) {
         switch (opcodeInt)
         {
         case 0:
-        flag = 'R';
+            flag = 'R';
             break;
-            case 1:
-        flag = 'R';
+        case 1:
+            flag = 'R';
             break;
-            case 2:
-        flag = 'R';
+        case 2:
+            flag = 'R';
             break;
-            case 3:
-        flag = 'I';
+        case 3:
+            flag = 'I';
             break;
-            case 4:
-        flag = 'I';
+        case 4:
+            flag = 'I';
             break;
-            case 5:
-        flag = 'R';
+        case 5:
+            flag = 'R';
             break;
-            case 6:
-        flag = 'I';
+        case 6:
+            flag = 'I';
             break;
-            case 7:
-        flag = 'J';
+        case 7:
+            flag = 'J';
             break;
-            case 8:
-        flag = 'R';
+        case 8:
+            flag = 'R';
             break;
-            case 9:
-        flag = 'R';
+        case 9:
+            flag = 'R';
             break;
-            case 10:
-        flag = 'I';
+        case 10:
+            flag = 'I';
             break;
-            case 11:
-        flag = 'I';
+        case 11:
+            flag = 'I';
             break;
 
         default:
@@ -306,7 +305,7 @@ void execProgram(){
             numberofinstructions++;
     
     while(1){       
-        printf("\nClock cycle number %d\n",cycle);
+        printf("\nClock cycle number %d\n",cycle+1);
 
         if(states[4]!=-1){
             printf("Write back stage\n");
@@ -325,7 +324,6 @@ void execProgram(){
             {decode();
             printf("Decode stage\n");} 
         
-        printf("numberofinstruction: %i\n",numberofinstructions);
         if(cycle%2==0 && numberofinstructions>0){
             printf("Fetch stage\n");
             fetch();
