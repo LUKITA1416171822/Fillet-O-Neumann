@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "memory.h"
 
 FILE *file;
 char tmp[33];
-char result[33];
+char resultString[33];
 int numberOfInstructions = 0;
 
 void regToBin(char str[]){ 
@@ -63,7 +64,7 @@ void convert(char chars[][33]) {
     char shamt[33] = "";
     char imm[33] = "";
     char address[33] = "";
-    // char result[33] = "";
+    // char resultString[33] = "";
     
     if (strcmp(chars[0], "ADD") == 0) {
         strcat(opcode, "0000");
@@ -74,7 +75,7 @@ void convert(char chars[][33]) {
         regToBin(chars[3]);
         strcat(R3, tmp);
         
-        strcat(result, strcat(opcode,strcat(R1,strcat(R2,strcat(R3,"0000000000000")))));
+        strcat(resultString, strcat(opcode,strcat(R1,strcat(R2,strcat(R3,"0000000000000")))));
     } 
         
     
@@ -87,7 +88,7 @@ void convert(char chars[][33]) {
         regToBin(chars[3]);
         strcat(R3, tmp);
         
-        strcat(result, strcat(opcode,strcat(R1,strcat(R2,strcat(R3,"0000000000000")))));
+        strcat(resultString, strcat(opcode,strcat(R1,strcat(R2,strcat(R3,"0000000000000")))));
     } else if (strcmp(chars[0], "MUL") == 0) {
         strcat(opcode, "0010");
         regToBin(chars[1]);
@@ -97,7 +98,7 @@ void convert(char chars[][33]) {
         regToBin(chars[3]);
         strcat(R3, tmp);
         
-        strcat(result, strcat(opcode,strcat(R1,strcat(R2,strcat(R3,"0000000000000")))));
+        strcat(resultString, strcat(opcode,strcat(R1,strcat(R2,strcat(R3,"0000000000000")))));
     } 
     else if (strcmp(chars[0], "MOVI") == 0) {
         strcat(opcode, "0011");
@@ -105,7 +106,7 @@ void convert(char chars[][33]) {
         strcat(R1, tmp);
         strcat(R2, "00000");
         strcat(imm, numToBin18(chars[2]));
-        strcat(result, strcat(opcode,strcat(R1,strcat(R2,imm))));
+        strcat(resultString, strcat(opcode,strcat(R1,strcat(R2,imm))));
     } else if (strcmp(chars[0], "JEQ") == 0) {
         strcat(opcode, "0100");
         regToBin(chars[1]);
@@ -113,7 +114,7 @@ void convert(char chars[][33]) {
         regToBin(chars[2]);
         strcat(R2, tmp);
         strcat(imm, numToBin18(chars[3]));
-        strcat(result, strcat(opcode,strcat(R1,strcat(R2,imm))));
+        strcat(resultString, strcat(opcode,strcat(R1,strcat(R2,imm))));
     } 
     else if (strcmp(chars[0], "AND") == 0) {
         strcat(opcode, "0100");
@@ -124,7 +125,7 @@ void convert(char chars[][33]) {
         regToBin(chars[3]);
         strcat(R3, tmp);
         
-        strcat(result, strcat(opcode,strcat(R1,strcat(R2,strcat(R3,"0000000000000")))));
+        strcat(resultString, strcat(opcode,strcat(R1,strcat(R2,strcat(R3,"0000000000000")))));
     } 
     else if (strcmp(chars[0], "XORI") == 0) {
         strcat(opcode, "0110");
@@ -133,12 +134,12 @@ void convert(char chars[][33]) {
         regToBin(chars[2]);
         strcat(R2, tmp);
         strcat(imm, numToBin18(chars[3]));
-        strcat(result, strcat(opcode,strcat(R1,strcat(R2,imm))));
+        strcat(resultString, strcat(opcode,strcat(R1,strcat(R2,imm))));
     }
      else if (strcmp(chars[0], "JMP") == 0) {
         strcat(opcode, "0111");
         strcat(address, numToBin28(chars[1]));
-        strcat(result, strcat(opcode,address));
+        strcat(resultString, strcat(opcode,address));
     } 
     else if (strcmp(chars[0], "LSL") == 0) {
         strcat(opcode, "1000");
@@ -149,7 +150,7 @@ void convert(char chars[][33]) {
         strcat(shamt, numToBin13(chars[3]));
         char tmp1[33] = "00000";
         strcat(tmp1, shamt);
-        strcat(result, strcat(opcode,strcat(R1,strcat(R2,tmp1))));
+        strcat(resultString, strcat(opcode,strcat(R1,strcat(R2,tmp1))));
     } 
     else if (strcmp(chars[0], "LSR") == 0) {
         strcat(opcode, "1001");
@@ -160,7 +161,7 @@ void convert(char chars[][33]) {
         strcat(shamt, numToBin13(chars[3]));
         char tmp1[33] = "00000";
         strcat(tmp1, shamt);
-        strcat(result, strcat(opcode,strcat(R1,strcat(R2,tmp1))));
+        strcat(resultString, strcat(opcode,strcat(R1,strcat(R2,tmp1))));
     } 
     else if (strcmp(chars[0], "MOVR") == 0) {
         strcat(opcode, "1010");
@@ -169,7 +170,7 @@ void convert(char chars[][33]) {
         regToBin(chars[2]);
         strcat(R2, tmp);
         strcat(imm, numToBin18(chars[3]));
-        strcat(result, strcat(opcode,strcat(R1,strcat(R2,imm))));
+        strcat(resultString, strcat(opcode,strcat(R1,strcat(R2,imm))));
     } else if (strcmp(chars[0], "MOVM") == 0) {
         strcat(opcode, "1011");
         regToBin(chars[1]);
@@ -177,7 +178,7 @@ void convert(char chars[][33]) {
         regToBin(chars[2]);
         strcat(R2, tmp);
         strcat(imm, numToBin18(chars[3]));
-        strcat(result, strcat(opcode,strcat(R1,strcat(R2,imm))));
+        strcat(resultString, strcat(opcode,strcat(R1,strcat(R2,imm))));
     } else {
         // Handle other cases
     }
@@ -234,11 +235,11 @@ void parse() {
         
         convert(chars);
 
-        printf("%s\n", result);
+        printf("%s\n", resultString);
 
-        
+        strcpy(memory[numberOfInstructions-1], resultString);
 
-        result[0] = '\0';
+        resultString[0] = '\0';
     }
 
     fclose(file);
@@ -246,3 +247,14 @@ void parse() {
 }
 
 
+// int main() {
+
+//     parse();
+//     printf("%d",numberOfInstructions);
+//     int i;
+//     for(i = 0; i < numberOfInstructions; i++) {
+//         printf("memory[%d] = %s\n", i, memory[i]);
+//     }
+    
+//     return 0;
+// }
