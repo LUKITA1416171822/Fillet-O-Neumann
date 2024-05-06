@@ -75,7 +75,7 @@ int binaryToDecimal(char *binary) {
         if(decodecycle==1){
             decodecycle=0;
         }
-        else{
+        else {
             printf("entered Decode\n");
         char opcode[5];
         strncpy(opcode, instructionRegister, 4);
@@ -176,7 +176,7 @@ int binaryToDecimal(char *binary) {
         executeCycle=0;}
             else {
                 printf("entered Execute\n");
-                printf("opcodeInt: %d\n",opcodeInt);
+                printf("reg: %d\n",reg1);
             if(opcodeInt==0){  //exec of add operation
             int v1=registers[reg2];
             int v2=registers[reg3];
@@ -204,8 +204,6 @@ int binaryToDecimal(char *binary) {
             result=v1*v2;
             temporayRegister=reg1;
             writeBackOn=1;
-           
-
 
         }
 
@@ -229,7 +227,12 @@ int binaryToDecimal(char *binary) {
                   //should this be in write back ?
                   for (int i = 0; i < 4; i++)
                   {
-                    states[i]=-1;
+                    if (states[i]<programCounter)
+                    {
+                        states[i]=-1;
+                    }
+                    
+                    
                   }
                   
                 }
@@ -268,11 +271,20 @@ int binaryToDecimal(char *binary) {
             // printf("%s \n",executeInstruction); 
            // printf("newpc: %s\n",newpc);            
             programCounter=binaryToDecimal(newpc);
+            printf("programCounter: %d\n",programCounter);
              // should be in write back stage ?
-             for (int i = 0; i < 4; i++)
+             for (int i = 0; i < 6; i++)
                   {
                     states[i]=-1;
+                    
+                    
                   }
+                  if (programCounter>states[1]&&programCounter>states[2])
+                  {
+                     decodecycle=1;
+                  }
+                
+                 
             
          }
         if(opcodeInt==8){   //exec of LSL operation
@@ -334,7 +346,6 @@ void execProgram(){
     for(int i = 0; i < 20; i++) 
         if(memory[i][0] != '\0')
             numberofinstructions++;
-    
     int opcodetemp;
     while(1){       
         printf("\nClock cycle number %d\n",cycle+1);
@@ -361,14 +372,21 @@ void execProgram(){
         
         //check if there is more instructions to fetch else set it to -1
         if(cycle%2==0 && numberofinstructions>0){
-            printf("Fetch stage\n");
+            if (programCounter==numberofinstructions)
+            {
+                states[0]=-1;
+            }
+            else
+            {
+                printf("Fetch stage\n");
             fetch();
-            numberofinstructions--;
+            // numberofinstructions--;
+            
             programCounter++;
+            }
+            
         }
-        else if(numberofinstructions==0){
-            states[0]=-1;
-        }
+        
   
        
             
@@ -390,6 +408,8 @@ void execProgram(){
             printf("states[%d] = %d\n", i, states[i]);
         }
         printf("states[%d] = %d\n", 0, states[0]);
+        printf("executeCycle : %d\n", executeCycle);
+        printf("decodecycle: %d\n", decodecycle);
          for(int i = 6; i > 0; i--) {
             states[i] = states[i-1];
         }
@@ -397,9 +417,9 @@ void execProgram(){
             printf("Breaked\n");
             break;
         }
-    //     for(int i = 0; i < 4; i++) {
-    //     printf("registers[%d] = %i\n", i, registers[i]);
-    // }
+        for(int i = 0; i < 6; i++) {
+        printf("registers[%d] = %i\n", i, registers[i]);
+    }
         }
 
        
@@ -424,7 +444,7 @@ int main(){
     // char line[33];
     //  printf("Enter the number of instructions\n");
 
-    for(int i = 0; i < 4; i++) {
+    for(int i = 0; i < 6; i++) {
         printf("registers[%d] = %i\n", i, registers[i]);
     }
     printf("memory[%d] = %s\n", 6, memory[6]);
