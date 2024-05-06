@@ -5,7 +5,6 @@
 #include "header/parse.h"
 int registers[32];
 int programCounter=0;
-
 int memoryDataRegister;
 int memoryAdressRegister;
 int temporayRegister;
@@ -21,8 +20,7 @@ int reg3;
 int imm_value;
 int shamt;
 int address;
-int numofcycles;
-int states[]={-1,-1,-1,-1,-1};
+int states[]={-1,-1,-1,-1,-1,-1,-1};
 int decodecycle=1;
 int executeCycle=1;
 int result;
@@ -64,11 +62,11 @@ int binaryToDecimal(char *binary) {
     
 
     void fetch(){
-        printf("programCounter: %d\n",programCounter);
-        printf("memory[programCounter] %s\n",memory[programCounter]);
-        printf("instructionRegister: %s\n",instructionRegister);
+        // printf("programCounter: %d\n",programCounter);
+        // printf("memory[programCounter] %s\n",memory[programCounter]);
+        // printf("instructionRegister: %s\n",instructionRegister);
         strcpy(instructionRegister,memory[programCounter]); 
-        printf("instructionRegister: %s\n",instructionRegister);
+        // printf("instructionRegister: %s\n",instructionRegister);
         states[0]=programCounter;
     }
 
@@ -78,6 +76,7 @@ int binaryToDecimal(char *binary) {
             decodecycle=0;
         }
         else{
+            printf("entered Decode\n");
         char opcode[5];
         strncpy(opcode, instructionRegister, 4);
         //opcode[5] = '\0'; // Ensure null-termination
@@ -139,11 +138,10 @@ int binaryToDecimal(char *binary) {
         strncpy(temp3,instructionRegister+14,5);
         strncpy(temp4,instructionRegister+19,13);
         
-        int reg1=binaryToDecimal(temp1);
-        int reg2=binaryToDecimal(temp2);
-        int reg3=binaryToDecimal(temp3);
-        int shamt=binaryToDecimal(temp4);
-
+         reg1=binaryToDecimal(temp1);
+         reg2=binaryToDecimal(temp2);
+         reg3=binaryToDecimal(temp3);
+         shamt=binaryToDecimal(temp4);
     
 
 
@@ -162,12 +160,11 @@ int binaryToDecimal(char *binary) {
         reg1=binaryToDecimal(temp1);
         reg2=binaryToDecimal(temp2);
         imm_value=binaryToDecimal(imm);
-       
-        
-
             }
+
             decodecycle=1;
             strcpy(executeInstruction,instructionRegister); 
+            
         }
         
 
@@ -175,27 +172,29 @@ int binaryToDecimal(char *binary) {
 
 
         void execute(){
-
         if(executeCycle==1){
-                executeCycle=0;
-            }
-
-        else{
-
-        if(opcodeInt==0){  //exec of add operation
+        executeCycle=0;}
+            else {
+                printf("entered Execute\n");
+                printf("opcodeInt: %d\n",opcodeInt);
+            if(opcodeInt==0){  //exec of add operation
             int v1=registers[reg2];
             int v2=registers[reg3];
             result=v1+v2;
             temporayRegister=reg1;
 
+            writeBackOn=1;//correct??
+           
+
         }
 
         if(opcodeInt==1){  //exec of sub operation
-            int v1=registers[reg1];
-            int v2=imm_value;
+            int v1=registers[reg2];
+            int v2=registers[reg3];//why immediate not r3
             result=v1-v2;
             temporayRegister=reg1;
             writeBackOn=1;
+            
 
         }
 
@@ -205,6 +204,7 @@ int binaryToDecimal(char *binary) {
             result=v1*v2;
             temporayRegister=reg1;
             writeBackOn=1;
+           
 
 
         }
@@ -213,6 +213,10 @@ int binaryToDecimal(char *binary) {
             result=imm_value;
             temporayRegister=reg1;
             writeBackOn=1;
+            
+            
+            printf("register: %d\n",temporayRegister);
+            printf("result: %d\n",result);
 
         }
 
@@ -220,8 +224,17 @@ int binaryToDecimal(char *binary) {
             int v1=registers[reg1];
             int v2=registers[reg2];
             if(v1==v2){
-                 programCounter=programCounter+imm_value-1; //should this be in write back ?
+                
+                 programCounter=programCounter+imm_value-1;
+                  //should this be in write back ?
+                  for (int i = 0; i < 4; i++)
+                  {
+                    states[i]=-1;
+                  }
+                  
                 }
+           
+
 
         }
 
@@ -231,7 +244,8 @@ int binaryToDecimal(char *binary) {
             result=v1&v2;
             temporayRegister=reg1; 
             writeBackOn=1;
-
+            
+          
         }
         
 
@@ -242,29 +256,37 @@ int binaryToDecimal(char *binary) {
            
             temporayRegister=reg1; 
             writeBackOn=1;
-
+           
         }
 
         if(opcodeInt==7){   //exec of JMP operation
             char newpc[]="00000000000000000000000000000000";
+            //print stuff
             intToBinary(programCounter-1,newpc,33);
            // printf("newpc: %s\n",newpc);
             strncpy(newpc+4,executeInstruction+4,28);
-            printf("%s \n",executeInstruction); 
+            // printf("%s \n",executeInstruction); 
            // printf("newpc: %s\n",newpc);            
-            programCounter=binaryToDecimal(newpc); // should be in write back stage ?
+            programCounter=binaryToDecimal(newpc);
+             // should be in write back stage ?
+             for (int i = 0; i < 4; i++)
+                  {
+                    states[i]=-1;
+                  }
             
          }
         if(opcodeInt==8){   //exec of LSL operation
             result=reg2<<shamt;
            temporayRegister=reg1;  
            writeBackOn=1;
+           
             
         }
         if(opcodeInt==9){   //exec of LSR operation
             result=reg2>>shamt;
             temporayRegister=reg1;
             writeBackOn=1;
+           
             
         }
 
@@ -275,6 +297,7 @@ int binaryToDecimal(char *binary) {
             temporayRegister=reg1;  
             memoryAccessOn=1;
             writeBackOn=1;
+           
 
 
         }
@@ -285,29 +308,29 @@ int binaryToDecimal(char *binary) {
             memoryAdressRegister=v2+v3;
             memoryAccessOn=1;
             writeBackOn=1;
+           
             
         }
 
-        
+        printf("result: %d\n",reg1);
             executeCycle=1;
             }
         }
  
         void writeBack(){
             registers[temporayRegister]=result;
-            printf("registers[%d] = ",temporayRegister);
+            printf("registers[%d] write %d on \n",temporayRegister,result);
             writeBackOn=0;
         }
 
         void memoryAccess(){
-            
+//DECIDE UPON UPCODE TO READ OR WRITE
                 intToBinary(registers[temporayRegister],memory[memoryAdressRegister],33); // not sure if handles negative numbers 
                 memoryAccessOn=0;
         }
 
 void execProgram(){
     parse();
-
     for(int i = 0; i < 20; i++) 
         if(memory[i][0] != '\0')
             numberofinstructions++;
@@ -316,7 +339,7 @@ void execProgram(){
     while(1){       
         printf("\nClock cycle number %d\n",cycle+1);
 
-        if(states[4]!=-1){
+        if(states[6]!=-1){
             
             printf("Write back stage instruction : %d \n",binaryToDecimal(memory[states[4]]));
             
@@ -324,15 +347,15 @@ void execProgram(){
                 writeBack();
         }
             
-        if(states[3]!=-1){
+        if(states[5]!=-1){
             printf("Memory access stage\n");
             if(memoryAccessOn==1)
                 memoryAccess();}
-        if(states[2]!=-1 ){
+        if(states[4]!=-1 || states[3]!=-1){
             execute();
-            opcodetemp=opcodeInt;
+            // opcodetemp=opcodeInt;
             printf("Execute stage\n");}
-        if(states[1]!=-1 )
+        if(states[2]!=-1 || states[1]!=-1 )
             {decode();
             printf("Decode stage\n");} 
         
@@ -347,129 +370,39 @@ void execProgram(){
             states[0]=-1;
         }
   
-        if( states[0]==-1 && states[1]==-1 && states[2]==-1 && states[3]==-1 ){
-            printf("Breaked\n");
-            break;
-        }
+       
             
 
-        for(int i = 4; i > 0; i--) {
-            states[i] = states[i-1];
-        }
+       
          
 
          cycle++;
          
-        if(states[0]!=-1)
-            printf("Instruction fetched : %s\n",instructionRegister);
-        if(states[1]!=-1) 
-            printf("Instruction decoded : %s\n",memory[states[1]]);
-        if(states[2]!=-1)
-            if(opcodetemp==0){  //exec of add operation
-            printf("Execute R-format R%d R%d R%d shiftAmount %d\n",reg2,reg3,reg1,shamt);
-            }
+        // if(states[0]!=-1)
+        //     printf("Instruction fetched : %s\n",instructionRegister);
+        // if(states[1]!=-1) 
+        //     printf("Instruction decoded : %s\n",memory[states[1]]);
+        // if(states[2]!=-1)
+        //    printf("Instruction executed : %s\n",memory[states[2]]);
+       
 
+       for(int i = 6; i > 0; i--) {
+            printf("states[%d] = %d\n", i, states[i]);
+        }
+        printf("states[%d] = %d\n", 0, states[0]);
+         for(int i = 6; i > 0; i--) {
+            states[i] = states[i-1];
+        }
+         if( states[0]==-1 && states[1]==-1 && states[2]==-1 && states[3]==-1 && states[4]==-1 && states[5]==-1 && states[6]==-1){
+            printf("Breaked\n");
+            break;
+        }
+    //     for(int i = 0; i < 4; i++) {
+    //     printf("registers[%d] = %i\n", i, registers[i]);
+    // }
         }
 
-        if(opcodetemp==1){  //exec of sub operation
-            int v1=registers[reg1];
-            int v2=imm_value;
-            result=v1-v2;
-            temporayRegister=reg1;
-            writeBackOn=1;
-
-        }
-
-        if(opcodeInt==2){  //exec of mul operation
-            int v1=registers[reg2];
-            int v2=registers[reg3];
-            result=v1*v2;
-            temporayRegister=reg1;
-            writeBackOn=1;
-
-
-        }
-
-        if(opcodeInt==3){  //exec of MOVI operation
-            result=imm_value;
-            temporayRegister=reg1;
-            writeBackOn=1;
-
-        }
-
-        if(opcodeInt==4){  //exec of JEQ operation
-            int v1=registers[reg1];
-            int v2=registers[reg2];
-            if(v1==v2){
-                 programCounter=programCounter+imm_value-1; //should this be in write back ?
-                }
-
-        }
-
-        if(opcodeInt==5){  //exec of and operation
-            int v1=registers[reg2];
-            int v2=registers[reg3];
-            result=v1&v2;
-            temporayRegister=reg1; 
-            writeBackOn=1;
-
-        }
-        
-
-        if(opcodeInt==6){  //exec of XORI operation
-            int v1=registers[reg2];
-            int v2=imm_value;
-            result=v1^v2;
-           
-            temporayRegister=reg1; 
-            writeBackOn=1;
-
-        }
-
-        if(opcodeInt==7){   //exec of JMP operation
-            char newpc[]="00000000000000000000000000000000";
-            intToBinary(programCounter-1,newpc,33);
-           // printf("newpc: %s\n",newpc);
-            strncpy(newpc+4,executeInstruction+4,28);
-            printf("%s \n",executeInstruction); 
-           // printf("newpc: %s\n",newpc);            
-            programCounter=binaryToDecimal(newpc); // should be in write back stage ?
-            
-         }
-        if(opcodeInt==8){   //exec of LSL operation
-            result=reg2<<shamt;
-           temporayRegister=reg1;  
-           writeBackOn=1;
-            
-        }
-        if(opcodeInt==9){   //exec of LSR operation
-            result=reg2>>shamt;
-            temporayRegister=reg1;
-            writeBackOn=1;
-            
-        }
-
-         if(opcodeInt==10){  //exec of MOVR operation
-            int v1=registers[reg2];
-            int v2=imm_value;
-            memoryAdressRegister=v1+v2;
-            temporayRegister=reg1;  
-            memoryAccessOn=1;
-            writeBackOn=1;
-
-
-        }
-         if(opcodeInt==11){  //exec of MOVM operation
-            temporayRegister=reg1;
-            int v2=registers[reg2];
-            int v3=imm_value;
-            memoryAdressRegister=v2+v3;
-            memoryAccessOn=1;
-            writeBackOn=1;
-            
-        }
-
-
+       
          //fetch instruction states print
          //Decode instruction states print
          //EXecute R-format R2 R3 R1 shiftAmount 
@@ -482,7 +415,7 @@ void execProgram(){
        
        
 
-}
+
 
 
 int main(){
@@ -491,13 +424,13 @@ int main(){
     // char line[33];
     //  printf("Enter the number of instructions\n");
 
-    for(int i = 0; i < sizeof(registers)/sizeof(registers[0]); i++) {
+    for(int i = 0; i < 4; i++) {
         printf("registers[%d] = %i\n", i, registers[i]);
     }
-    
-    for(int i = 0; i < 20; i++) {
-        printf("memory[%d] = %s\n", i, memory[i]);
-    }
+    printf("memory[%d] = %s\n", 6, memory[6]);
+    // for(int i = 0; i < 20; i++) {
+    //     printf("memory[%d] = %s\n", i, memory[i]);
+    // }
     // FILE *file = fopen("Output.txt", "r");
     // if (file == NULL) {
     //     printf("Failed to open file\n");
