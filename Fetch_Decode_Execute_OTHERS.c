@@ -26,7 +26,7 @@ int executeCycle=1;
 int result;
 int memoryAccessOn=0;
 int writeBackOn=0;
-
+int opcodetemp;
 
 
 int binaryToDecimal(char *binary) {
@@ -288,14 +288,14 @@ int binaryToDecimal(char *binary) {
             
          }
         if(opcodeInt==8){   //exec of LSL operation
-            result=reg2<<shamt;
+           result=registers[reg2]<<shamt;
            temporayRegister=reg1;  
            writeBackOn=1;
            
             
         }
         if(opcodeInt==9){   //exec of LSR operation
-            result=reg2>>shamt;
+            result=registers[reg2]>>shamt;
             temporayRegister=reg1;
             writeBackOn=1;
            
@@ -319,7 +319,7 @@ int binaryToDecimal(char *binary) {
             int v3=imm_value;
             memoryAdressRegister=v2+v3;
             memoryAccessOn=1;
-            writeBackOn=1;
+            // writeBackOn=1;
            
             
         }
@@ -337,16 +337,24 @@ int binaryToDecimal(char *binary) {
 
         void memoryAccess(){
 //DECIDE UPON UPCODE TO READ OR WRITE
-                intToBinary(registers[temporayRegister],memory[memoryAdressRegister],33); // not sure if handles negative numbers 
+                if(opcodetemp==11){
+                    printf("reg:%d, value:%d\n",temporayRegister,registers[temporayRegister]);
+                    intToBinary(registers[temporayRegister],memory[memoryAdressRegister],33);
+                    memoryAccessOn=0;
+                }
+                 // not sure if handles negative numbers 
+                 else if(opcodetemp==10){
+
+                    registers[temporayRegister]=binaryToDecimal(memory[memoryAdressRegister]);
                 memoryAccessOn=0;
-        }
+        }}
 
 void execProgram(){
     parse();
     for(int i = 0; i < 20; i++) 
         if(memory[i][0] != '\0')
             numberofinstructions++;
-    int opcodetemp;
+    
     while(1){       
         printf("\nClock cycle number %d\n",cycle+1);
 
@@ -364,7 +372,7 @@ void execProgram(){
                 memoryAccess();}
         if(states[4]!=-1 || states[3]!=-1){
             execute();
-            // opcodetemp=opcodeInt;
+            opcodetemp=opcodeInt;
             printf("Execute stage\n");}
         if(states[2]!=-1 || states[1]!=-1 )
             {decode();
@@ -413,7 +421,7 @@ void execProgram(){
          for(int i = 6; i > 0; i--) {
             states[i] = states[i-1];
         }
-         if( states[0]==-1 && states[1]==-1 && states[2]==-1 && states[3]==-1 && states[4]==-1 && states[5]==-1 && states[6]==-1){
+         if( states[0]==-1 && states[1]==-1 && states[2]==-1 && states[3]==-1 && states[4]==-1 && states[5]==-1 ){
             printf("Breaked\n");
             break;
         }
@@ -447,7 +455,7 @@ int main(){
     for(int i = 0; i < 6; i++) {
         printf("registers[%d] = %i\n", i, registers[i]);
     }
-    printf("memory[%d] = %s\n", 6, memory[6]);
+    printf("memory[%d] = %s\n", 8+1026, memory[8+1026]);
     // for(int i = 0; i < 20; i++) {
     //     printf("memory[%d] = %s\n", i, memory[i]);
     // }

@@ -117,7 +117,7 @@ void convert(char chars[][33]) {
         strcat(resultString, strcat(opcode,strcat(R1,strcat(R2,imm))));
     } 
     else if (strcmp(chars[0], "AND") == 0) {
-        strcat(opcode, "0100");
+        strcat(opcode, "0101");
         regToBin(chars[1]);
         strcat(R1, tmp);
         regToBin(chars[2]);
