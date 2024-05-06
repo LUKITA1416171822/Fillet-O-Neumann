@@ -27,6 +27,8 @@ int result;
 int memoryAccessOn=0;
 int writeBackOn=0;
 int opcodetemp;
+int dispatch;
+int cycletoggle=0;
 
 
 int binaryToDecimal(char *binary) {
@@ -225,15 +227,7 @@ int binaryToDecimal(char *binary) {
                 
                  programCounter=programCounter+imm_value-1;
                   //should this be in write back ?
-                  for (int i = 0; i < 4; i++)
-                  {
-                    if (states[i]<programCounter)
-                    {
-                        states[i]=-1;
-                    }
-                    
-                    
-                  }
+                  dispatch=1;
                   
                 }
            
@@ -273,16 +267,9 @@ int binaryToDecimal(char *binary) {
             programCounter=binaryToDecimal(newpc);
             printf("programCounter: %d\n",programCounter);
              // should be in write back stage ?
-             for (int i = 0; i < 6; i++)
-                  {
-                    states[i]=-1;
-                    
-                    
-                  }
-                  if (programCounter>states[1]&&programCounter>states[2])
-                  {
-                     decodecycle=1;
-                  }
+            dispatch=1;  
+            decodecycle=1;
+                  
                 
                  
             
@@ -330,9 +317,15 @@ int binaryToDecimal(char *binary) {
         }
  
         void writeBack(){
+            if(temporayRegister==0){
+                writeBackOn=0;
+                return;
+            }
+            else{
             registers[temporayRegister]=result;
             printf("registers[%d] write %d on \n",temporayRegister,result);
             writeBackOn=0;
+        }
         }
 
         void memoryAccess(){
@@ -379,7 +372,7 @@ void execProgram(){
             printf("Decode stage\n");} 
         
         //check if there is more instructions to fetch else set it to -1
-        if(cycle%2==0 && numberofinstructions>0){
+        if(cycle%2==cycletoggle && numberofinstructions>0){
             if (programCounter==numberofinstructions)
             {
                 states[0]=-1;
@@ -389,7 +382,16 @@ void execProgram(){
                 printf("Fetch stage\n");
             fetch();
             // numberofinstructions--;
-            
+            //print
+            if(dispatch)
+            {cycletoggle=!cycletoggle;
+                dispatch=0;
+                states[0]=-1;
+                states[1]=-1;
+                states[2]=-1;
+                states[3]=-1;
+                programCounter--;
+                }
             programCounter++;
             }
             
