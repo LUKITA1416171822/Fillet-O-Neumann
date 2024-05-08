@@ -360,7 +360,16 @@ int binaryToDecimal(char *binary) {
             printf("Register %d value changed to %d \n",temporayRegister,result);
             
         }}
-        
+         if(dispatch)
+            {
+                // cycletoggle=!cycletoggle;
+                dispatch=0;
+                states[0]=-1;
+                states[1]=-1;
+                states[2]=-1;
+                states[3]=-1;
+                programCounter--;
+                }
         
         }
 
@@ -412,7 +421,7 @@ void execProgram(){
             } 
         
         //check if there is more instructions to fetch else set it to -1
-        if(cycle%2==cycletoggle && numberofinstructions>0){
+        if(cycle%2==0 && numberofinstructions>0){
             if (programCounter==numberofinstructions)
             {
                 states[0]=-1;
@@ -423,15 +432,7 @@ void execProgram(){
             fetch();
             // numberofinstructions--;
             //print
-            if(dispatch)
-            {
-                dispatch=0;
-                states[0]=-1;
-                states[1]=-1;
-                states[2]=-1;
-                states[3]=-1;
-                programCounter--;
-                }
+           
             programCounter++;
             }
             
