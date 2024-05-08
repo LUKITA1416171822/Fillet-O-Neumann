@@ -27,7 +27,7 @@ int result;
 int memoryAccessOn=0;
 int writeBackOn=0;
 int opcodetemp;
-int dispatch;
+int dispatch=0;
 int cycletoggle=0;
 int writeBacktemp;
 
@@ -343,6 +343,7 @@ int binaryToDecimal(char *binary) {
         }
  
         void writeBack(){
+            if(states[5]==states[6]){
             if(temporayRegister==0){
                 writeBackOn=0;
                 return;
@@ -358,7 +359,9 @@ int binaryToDecimal(char *binary) {
             writeBackOn=0;
             printf("Register %d value changed to %d \n",temporayRegister,result);
             
-        }
+        }}
+        
+        
         }
 
         void memoryAccess(){
@@ -374,7 +377,8 @@ int binaryToDecimal(char *binary) {
 
                     writeBacktemp=binaryToDecimal(memory[memoryAdressRegister]);
                     memoryAccessOn=0;
-        }}
+        }
+        }
 
 void execProgram(){
     parse();
@@ -395,7 +399,7 @@ void execProgram(){
             
         if(states[5]!=-1){
            // printf("Memory access stage\n");
-            if(memoryAccessOn==1)
+            
                 memoryAccess();}
         if(states[4]!=-1 || states[3]!=-1){
             execute();
@@ -420,7 +424,7 @@ void execProgram(){
             // numberofinstructions--;
             //print
             if(dispatch)
-            {cycletoggle=!cycletoggle;
+            {
                 dispatch=0;
                 states[0]=-1;
                 states[1]=-1;
