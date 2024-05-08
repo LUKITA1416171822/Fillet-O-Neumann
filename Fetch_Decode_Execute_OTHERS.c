@@ -241,16 +241,6 @@ int binaryToDecimal(char *binary) {
                   dispatch=1;
                   
                 }
-                if(dispatch)
-            {
-                // cycletoggle=!cycletoggle;
-                dispatch=0;
-                states[0]=-1;
-                states[1]=-1;
-                states[2]=-1;
-                states[3]=-1;
-                programCounter--;
-                }
            
 
 
@@ -296,16 +286,6 @@ int binaryToDecimal(char *binary) {
              // should be in write back stage ?
             dispatch=1;  
             decodecycle=1;
-            if(dispatch)
-            {
-                // cycletoggle=!cycletoggle;
-                dispatch=0;
-                states[0]=-1;
-                states[1]=-1;
-                states[2]=-1;
-                states[3]=-1;
-                programCounter--;
-                }
                   
                 
                  
@@ -380,7 +360,7 @@ int binaryToDecimal(char *binary) {
             printf("Register %d value changed to %d \n",temporayRegister,result);
             
         }}
-         
+        
         
         }
 
@@ -443,7 +423,16 @@ void execProgram(){
             fetch();
             // numberofinstructions--;
             //print
-           
+            if(dispatch)
+            {
+                // cycletoggle=!cycletoggle;
+                dispatch=0;
+                // states[0]=-1;
+                states[1]=-1;
+                states[2]=-1;
+                states[3]=-1;
+                programCounter--;
+                }
             programCounter++;
             }
             
