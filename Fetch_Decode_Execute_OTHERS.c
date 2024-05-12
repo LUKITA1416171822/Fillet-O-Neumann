@@ -131,19 +131,38 @@ int binaryToDecimal(char *binary) {
 
         if(flag=='R')
      {  
-        char temp1[6]="00000";
-        char temp2[6]="00000";
-        char temp3[6]="00000";
-        char temp4[14]="0000000000000";
+        char temp1[7]="00000";
+        char temp2[7]="00000";
+        char temp3[7]="00000";
+        char temp4[15]="0000000000000";
         
         strncpy(temp1,instructionRegister+4,5);
         strncpy(temp2,instructionRegister+9,5);
         strncpy(temp3,instructionRegister+14,5);
         strncpy(temp4,instructionRegister+19,13);
         
+        
+
+        char temp11[(sizeof(temp1)/sizeof(char)) + 1]; // One extra space for the null terminator
+        sprintf(temp11, "0%s", temp1);
+        strcpy(temp1, temp11);
         reg1=binaryToDecimal(temp1);
+        
+        char temp12[(sizeof(temp2)/sizeof(char)) + 1]; // One extra space for the null terminator
+        sprintf(temp12, "0%s", temp2);
+        strcpy(temp2, temp12);
         reg2=binaryToDecimal(temp2);
+
+        char temp13[(sizeof(temp3)/sizeof(char)) + 1]; // One extra space for the null terminator
+        sprintf(temp13, "0%s", temp3);
+        strcpy(temp3, temp13);
         reg3=binaryToDecimal(temp3);
+
+        char temp14[(sizeof(temp4)/sizeof(char)) + 1]; // One extra space for the null terminator
+        sprintf(temp14, "0%s", temp4);
+        strcpy(temp4, temp14);
+        
+        
         shamt=binaryToDecimal(temp4);
     
 
@@ -154,15 +173,15 @@ int binaryToDecimal(char *binary) {
      {
         char temp1[7]="00000";
         char temp2[7]="00000";
-        char imm[19]="000000000000000000";
+        char imm[20]="000000000000000000";
        
         strncpy(temp1,instructionRegister+4,5);
-        char temp[8]; // One extra space for the null terminator
+        char temp[(sizeof(temp1)/sizeof(char)) + 1]; // One extra space for the null terminator
         sprintf(temp, "0%s", temp1);
         strcpy(temp1, temp);
 
         strncpy(temp2,instructionRegister+9,5);
-        char temp100[8]; // One extra space for the null terminator
+        char temp100[(sizeof(temp2)/sizeof(char)) + 1]; // One extra space for the null terminator
         sprintf(temp100, "0%s", temp2);
         strcpy(temp2, temp100);
 
@@ -172,6 +191,12 @@ int binaryToDecimal(char *binary) {
         reg2=binaryToDecimal(temp2);
         printf("reg1: %d\n",reg1);
         printf("reg2: %d\n",reg2);
+
+        char tempimm[(sizeof(imm)/sizeof(char)) + 1]; // One extra space for the null terminator
+        sprintf(tempimm, "0%s", imm);
+        strcpy(imm, tempimm);
+
+        printf("imm: %s\n",imm);
         imm_value=binaryToDecimal(imm);
             }
 
@@ -290,6 +315,10 @@ void execute(){
             strncpy(newpc+4,executeInstruction+4,28);
             // printf("%s \n",executeInstruction); 
            // printf("newpc: %s\n",newpc);          
+           
+            char temppc[(sizeof(newpc)/sizeof(char)) + 1]; // One extra space for the null terminator
+            sprintf(temppc, "0%s", newpc);
+            strcpy(newpc, temppc);
             programCounter=binaryToDecimal(newpc);
             printf("address to jump to= %d\n",programCounter);  
             printf("programCounter: %d\n",programCounter);
@@ -384,8 +413,14 @@ void execute(){
                 }
                 
                  else if(opcodetemp==10){
+                    char mem [sizeof(memory[memoryAdressRegister])/sizeof(char) +1];
+                    strcpy(mem,memory[memoryAdressRegister]);
 
-                    writeBacktemp=binaryToDecimal(memory[memoryAdressRegister]);
+                    char tempmem[(sizeof(mem)/sizeof(char)) + 1]; // One extra space for the null terminator
+                    sprintf(tempmem, "0%s", mem);
+                    strcpy(mem, tempmem);
+
+                    writeBacktemp=binaryToDecimal(mem);
                     memoryAccessOn=0;
         }
         }
