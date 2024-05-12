@@ -183,7 +183,7 @@ int binaryToDecimal(char *binary) {
             int v2=registers[reg3];
             printf("operand 1 = %d\n",registers[reg2]);
             printf("operand 2 = %d\n",registers[reg3]);
-            printf("destination register = %d",reg1);
+            printf("destination register = %d\n",reg1);
             result=v1+v2;
             temporayRegister=reg1;
 
@@ -446,21 +446,23 @@ void execProgram(){
          cycle++;
          
      if(states[0]!=-1 &&states[0]!=states[1])
-            printf("Instruction fetched : %s\n",instructionRegister);
+            // printf("Instruction fetched : %s\n",instructionRegister);
+            printf("Instruction fetched : %s\n",instructions[states[0]]);
+
         if(states[1]!=-1 )
-            printf("Instruction decoding : %s\n",memory[states[1]]);
+            printf("Instruction decoding : %s\n",instructions[states[1]]);
         
         if(states[3]!=-1)
-           printf("Instruction executing : %s\n",memory[states[3]]);
+           printf("Instruction executing : %s\n",instructions[states[3]]);
         if(states[4]!=-1 && states[4]!=states[5] && states[3]==-1)
-           printf("Instruction executing : %s\n",memory[states[4]]);
+           printf("Instruction executing : %s\n",instructions[states[4]]);
 
         
         if(states[5]!=-1 && states[5]!=states[6])
-           printf("Instruction in Memory Access : %s\n",memory[states[5]]);
+           printf("Instruction in Memory Access : %s\n",instructions[states[5]]);
 
         if(states[6]!=-1 && states[5]==states[6])
-             printf("Instruction in WriteBack stage : %s\n",memory[states[6]]);
+             printf("Instruction in WriteBack stage : %s\n",instructions[states[6]]);
        
 
        for(int i = 6; i > 0; i--) {
@@ -517,7 +519,7 @@ int main(){
     for(int i = 0; i < 2048; i++) {
         // If the first character of the current string is not '\0', print it
         if(memory[i][0] != '\0') {
-            printf("%d : %s\n",i, memory[i]);
+            printf("%d : %s\n",i, instructions[i]);
         }
     }
    

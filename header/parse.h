@@ -199,8 +199,10 @@ void parse() {
         printf("Could not open file Output.txt\n");
         return;
     }
-
+    int count = 0;
     while (fgets(line, sizeof(line), file)) {
+        strncpy(instructions[count], line, strlen(line) - 2);
+        instructions[count][strlen(line) - 2] = '\0'; // Null-terminate the string
         numberOfInstructions++;
         int c = 0;
         for(int i = 0; i < strlen(line); i++) {
@@ -240,6 +242,7 @@ void parse() {
         strcpy(memory[numberOfInstructions-1], resultString);
 
         resultString[0] = '\0';
+        count++;
     }
 
     fclose(file);
