@@ -141,10 +141,10 @@ int binaryToDecimal(char *binary) {
         strncpy(temp3,instructionRegister+14,5);
         strncpy(temp4,instructionRegister+19,13);
         
-         reg1=binaryToDecimal(temp1);
-         reg2=binaryToDecimal(temp2);
-         reg3=binaryToDecimal(temp3);
-         shamt=binaryToDecimal(temp4);
+        reg1=binaryToDecimal(temp1);
+        reg2=binaryToDecimal(temp2);
+        reg3=binaryToDecimal(temp3);
+        shamt=binaryToDecimal(temp4);
     
 
 
@@ -152,13 +152,17 @@ int binaryToDecimal(char *binary) {
 
      if(flag=='I')
      {
-        char temp1[6]="00000";
+        char temp1[7]="00000";
         char temp2[6]="00000";
         char imm[19]="000000000000000000";
        
-       strncpy(temp1,instructionRegister+4,5);
-       strncpy(temp2,instructionRegister+9,5);
-       strncpy(imm,instructionRegister+14,18);
+        strncpy(temp1,instructionRegister+4,5);
+        char temp[8]; // One extra space for the null terminator
+        sprintf(temp, "0%s", temp1);
+        strcpy(temp1, temp);
+        strncpy(temp2,instructionRegister+9,5);
+        
+        strncpy(imm,instructionRegister+14,18);
         
         reg1=binaryToDecimal(temp1);
         reg2=binaryToDecimal(temp2);
@@ -174,11 +178,11 @@ int binaryToDecimal(char *binary) {
     }
 
 
-        void execute(){
-        if(executeCycle==1){
-        executeCycle=0;}
-            else {
-            if(opcodeInt==0){  //exec of add operation
+void execute(){
+    if(executeCycle==1)
+        executeCycle=0;
+    else {
+        if(opcodeInt==0){  //exec of add operation
             int v1=registers[reg2];
             int v2=registers[reg3];
             printf("operand 1 = %d\n",registers[reg2]);
@@ -355,7 +359,7 @@ int binaryToDecimal(char *binary) {
                 }
                 else{
                     registers[temporayRegister]=result;
-                    }
+                }
             writeBackOn=0;
             printf("Register %d value changed to %d \n",temporayRegister,result);
             
@@ -519,7 +523,8 @@ int main(){
     for(int i = 0; i < 2048; i++) {
         // If the first character of the current string is not '\0', print it
         if(memory[i][0] != '\0') {
-            printf("%d : %s\n",i, instructions[i]);
+            printf("%d : %s, %s\n",i, instructions[i],memory[i]);
+            
         }
     }
    
