@@ -369,7 +369,7 @@ void execProgram(){
             printf("Execute R-format R%d R%d R%d shiftAmount %d\n",reg2,reg3,reg1,shamt);
             }
 
-        }
+    }
 
         if(opcodetemp==1){  //exec of sub operation
             int v1=registers[reg1];
@@ -478,11 +478,10 @@ void execProgram(){
          //memory access stage updates & storage
          //write back stage updates & storage Registers[Temporary Registers]
        
-    }
+}
        
        
 
-}
 
 
 int main(){
