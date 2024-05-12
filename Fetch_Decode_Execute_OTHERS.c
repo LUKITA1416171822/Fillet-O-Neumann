@@ -153,19 +153,25 @@ int binaryToDecimal(char *binary) {
      if(flag=='I')
      {
         char temp1[7]="00000";
-        char temp2[6]="00000";
+        char temp2[7]="00000";
         char imm[19]="000000000000000000";
        
         strncpy(temp1,instructionRegister+4,5);
         char temp[8]; // One extra space for the null terminator
         sprintf(temp, "0%s", temp1);
         strcpy(temp1, temp);
+
         strncpy(temp2,instructionRegister+9,5);
-        
+        char temp100[8]; // One extra space for the null terminator
+        sprintf(temp100, "0%s", temp2);
+        strcpy(temp2, temp100);
+
         strncpy(imm,instructionRegister+14,18);
         
         reg1=binaryToDecimal(temp1);
         reg2=binaryToDecimal(temp2);
+        printf("reg1: %d\n",reg1);
+        printf("reg2: %d\n",reg2);
         imm_value=binaryToDecimal(imm);
             }
 
