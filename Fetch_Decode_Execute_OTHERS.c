@@ -7,30 +7,33 @@ int registers[32];
 int programCounter=0;
 int memoryDataRegister;
 int memoryAdressRegister;
-int temporayRegister;
+int temporayRegister;//used to store register address preventing its writeback in execute
 char instructionRegister[33];
-char executeInstruction[33];
+char executeInstruction[33];//used to to prevent instructionRegister being overwritten in in fetch used in case only of jumping uncoditionaly
 int numberofinstructions;
 int cycle=0;
-int opcodeInt;
-char flag;
-int reg1;
-int reg2;
-int reg3;
-int imm_value;
-int shamt;
-int address;
-int states[]={-1,-1,-1,-1,-1,-1,-1};
-int decodecycle=1;
-int executeCycle=1;
-int result;
-int memoryAccessOn=0;
-int writeBackOn=0;
-int opcodetemp;
-int dispatch=0;
-int cycletoggle=0;
-int writeBacktemp;
-
+int opcodeInt;//stored opcode from Decode passed to execute
+char flag;//Decide R/J/I format
+int reg1;//index of dest register in almost all instructions check instructions same order
+int reg2;//index of source register in almost all instructions check instructions same order
+int reg3;//index of source  register in almost all instructions check instructions same order
+int reg1Value;//value of reg1 if needed
+int reg2Value;//value of reg2 if needed
+int reg3Value;//value of reg3 if needed
+int imm_value;//value of imm if needed
+int shamt;//value of shamt if needed
+int states[]={-1,-1,-1,-1,-1,-1,-1};//{F,D1,D2,E1,E2,MA,WB} used to know state of each stage if not -1 then it contains address of instruction wanted 
+int decodecycle=1;//used for stall
+int executeCycle=1;//used for stall
+int result;//result of alu
+int memoryAccessOn=0;//prevent unncessary execution of MA if not needed instruction is still considered in MA
+int writeBackOn=0;//same as  above
+int opcodetemp;//prevent overwritten of opcodeint
+int dispatch=0;//flush in case of jump
+int writeBacktemp;//value to be stored in when doing MOVR
+int forwardedValue;//forward value in case of Register is repeated preventing using incorrect value of varriable when needed in decode
+int forwardedRegister;//functions as above but as index
+int oldPc;// used for printing purposes in case of jump
 
 int binaryToDecimal(char *binary) {
     int decimal = 0;
@@ -65,16 +68,18 @@ int binaryToDecimal(char *binary) {
     
 
     void fetch(){
-        // printf("programCounter: %d\n",programCounter);
-        // printf("memory[programCounter] %s\n",memory[programCounter]);
-        // printf("instructionRegister: %s\n",instructionRegister);
+        //in case of dispatch then just fetch old instruction as important remark
+        if(dispatch)
+            {strcpy(instructionRegister,memory[oldPc]);
+            states[0]=oldPc;
+            return;}
         strcpy(instructionRegister,memory[programCounter]); 
         // printf("instructionRegister: %s\n",instructionRegister);
         states[0]=programCounter;
     }
 
     void decode(){
-        
+        //stall
         if(decodecycle==1){
             decodecycle=0;
         }
@@ -164,8 +169,8 @@ int binaryToDecimal(char *binary) {
         
         
         shamt=binaryToDecimal(temp4);
-    
-
+             reg2Value=registers[reg2];
+             reg3Value=registers[reg3];
 
      }
 
@@ -198,9 +203,29 @@ int binaryToDecimal(char *binary) {
 
         printf("imm: %s\n",imm);
         imm_value=binaryToDecimal(imm);
+        reg1Value=registers[reg1];
+        reg2Value=registers[reg2];
+        
             }
 
             decodecycle=1;
+            //forward correct values if needed to avoid hazards
+            if (writeBackOn)
+            {
+                if(forwardedRegister==reg1)
+                {
+                    reg1Value=forwardedValue;
+                }
+                if(forwardedRegister==reg2)
+                {
+                    reg2Value=forwardedValue;
+                }
+                if(forwardedRegister==reg3)
+                {
+                    reg3Value=forwardedValue;
+                }
+            }
+            
             strcpy(executeInstruction,instructionRegister); 
             
         }
@@ -210,30 +235,30 @@ int binaryToDecimal(char *binary) {
 
 
 void execute(){
+    //stall
     if(executeCycle==1)
         executeCycle=0;
     else {
         if(opcodeInt==0){  //exec of add operation
-            int v1=registers[reg2];
-            int v2=registers[reg3];
-            printf("operand 1 = %d\n",registers[reg2]);
-            printf("operand 2 = %d\n",registers[reg3]);
+     
+            printf("operand 1 = %d\n",reg2Value);
+            printf("operand 2 = %d\n",reg3Value);
             printf("destination register = %d\n",reg1);
-            result=v1+v2;
+            result=reg2Value+reg3Value;
             temporayRegister=reg1;
-
+       printf("entered exec with dest:%d\n",temporayRegister);
             writeBackOn=1;//correct??
            
 
         }
 
         if(opcodeInt==1){  //exec of sub operation
-            int v1=registers[reg2];
-            int v2=registers[reg3];//why immediate not r3
+            // int v1=registers[reg2];
+            // int v2=registers[reg3];//why immediate not r3
             printf("operand 1 = %d\n",registers[reg2]);
             printf("operand 2 = %d\n",registers[reg3]);
             printf("destination register = %d\n",reg1);
-            result=v1-v2;
+            result=reg2Value-reg3Value;
             temporayRegister=reg1;
             writeBackOn=1;
             
@@ -241,12 +266,12 @@ void execute(){
         }
 
         if(opcodeInt==2){  //exec of mul operation
-            int v1=registers[reg2];
-            int v2=registers[reg3];
+            // int v1=registers[reg2];
+            // int v2=registers[reg3];
             printf("operand 1 = %d\n",registers[reg2]);
             printf("operand 2 = %d\n",registers[reg3]);
             printf("destination register = %d\n",reg1);
-            result=v1*v2;
+            result=reg2Value*reg3Value;
             temporayRegister=reg1;
             writeBackOn=1;
 
@@ -264,13 +289,13 @@ void execute(){
         }
 
         if(opcodeInt==4){  //exec of JEQ operation
-            int v1=registers[reg1];
-            int v2=registers[reg2];
-            printf("operand 1 = %d\n",registers[reg2]);
-            printf("operand 2 = %d\n",registers[reg3]);
+            // int v1=registers[reg1];
+            // int v2=registers[reg2];
+            printf("operand 1 = %d\n",registers[reg1]);
+            printf("operand 2 = %d\n",registers[reg2]);
             printf("Immediate value = %d\n",imm_value);
-            if(v1==v2){
-                
+            if(reg1Value==reg2Value){
+                oldPc=programCounter;
                  programCounter=programCounter+imm_value-1;
                   //should this be in write back ?
                   dispatch=1;
@@ -284,7 +309,7 @@ void execute(){
         if(opcodeInt==5){  //exec of and operation
             int v1=registers[reg2];
             int v2=registers[reg3];
-            result=v1&v2;
+            result=reg2Value&reg3Value;
             temporayRegister=reg1; 
             writeBackOn=1;
             printf("operand 1 = %d\n",registers[reg2]);
@@ -297,7 +322,7 @@ void execute(){
         if(opcodeInt==6){  //exec of XORI operation
             int v1=registers[reg2];
             int v2=imm_value;
-            result=v1^v2;
+            result=reg2Value^imm_value;
            
             temporayRegister=reg1; 
             printf("operand 1 = %d\n",registers[reg2]);
@@ -310,6 +335,7 @@ void execute(){
         if(opcodeInt==7){   //exec of JMP operation
             char newpc[]="00000000000000000000000000000000";
             //print stuff
+            oldPc=programCounter;
             intToBinary(programCounter-1,newpc,33);
            // printf("newpc: %s\n",newpc);
             strncpy(newpc+4,executeInstruction+4,28);
@@ -331,7 +357,7 @@ void execute(){
             
          }
         if(opcodeInt==8){   //exec of LSL operation
-           result=registers[reg2]<<shamt;
+           result=reg2Value<<shamt;
            temporayRegister=reg1;  
            writeBackOn=1;
            printf("operand 1 = %d\n",registers[reg2]);
@@ -341,7 +367,7 @@ void execute(){
             
         }
         if(opcodeInt==9){   //exec of LSR operation
-            result=registers[reg2]>>shamt;
+            result=reg2Value>>shamt;
             temporayRegister=reg1;
             writeBackOn=1;
             printf("operand 1 = %d\n",registers[reg2]);
@@ -351,9 +377,9 @@ void execute(){
         }
 
          if(opcodeInt==10){  //exec of MOVR operation
-            int v1=registers[reg2];
-            int v2=imm_value;
-            memoryAdressRegister=v1+v2;
+            // int v1=registers[reg2];
+            // int v2=imm_value;
+            memoryAdressRegister=reg2Value+imm_value;
             temporayRegister=reg1;  
             memoryAccessOn=1;
             writeBackOn=1;
@@ -366,9 +392,9 @@ void execute(){
         }
          if(opcodeInt==11){  //exec of MOVM operation
             temporayRegister=reg1;
-            int v2=registers[reg2];
-            int v3=imm_value;
-            memoryAdressRegister=v2+v3;
+            // int v2=registers[reg2];
+            // int v3=imm_value;
+            memoryAdressRegister=reg2Value+imm_value;
             memoryAccessOn=1;
             // writeBackOn=1;
             printf("operand 1 = %d\n",registers[reg1]);
@@ -377,26 +403,34 @@ void execute(){
         }
 
         // printf("result: %d\n",reg1);
+        opcodetemp=opcodeInt;
             executeCycle=1;
+            if(writeBackOn){
+        forwardedValue = result;
+        forwardedRegister = temporayRegister;
+    }
             }
         }
  
         void writeBack(){
+            
             if(states[5]==states[6]){
             if(temporayRegister==0){
                 writeBackOn=0;
                 return;
             }
 
-            else{
+            else{//MoVR
                 if(opcodetemp==10){
                     registers[temporayRegister]=writeBacktemp;
-                }
+                }//MOVM
                 else{
+                    printf("entered write back with dest:%d and res:%d\n",temporayRegister ,result);
                     registers[temporayRegister]=result;
+                    printf("Register %d value changed to %d \n",temporayRegister,registers[1]);
                 }
             writeBackOn=0;
-            printf("Register %d value changed to %d \n",temporayRegister,result);
+            printf("Register %d value changed to %d \n",temporayRegister,registers[temporayRegister]);
             
         }}
         
@@ -448,7 +482,7 @@ void execProgram(){
                 memoryAccess();}
         if(states[4]!=-1 || states[3]!=-1){
             execute();
-            opcodetemp=opcodeInt;
+            
             //printf("Execute stage\n");
             }
         if(states[2]!=-1 || states[1]!=-1 )
@@ -468,16 +502,7 @@ void execProgram(){
             fetch();
             // numberofinstructions--;
             //print
-            if(dispatch)
-            {
-                // cycletoggle=!cycletoggle;
-                dispatch=0;
-                // states[0]=-1;
-                states[1]=-1;
-                states[2]=-1;
-                states[3]=-1;
-                programCounter--;
-                }
+           
             programCounter++;
             }
             
@@ -490,9 +515,11 @@ void execProgram(){
 
          cycle++;
          
-     if(states[0]!=-1 &&states[0]!=states[1])
+     if(states[0]!=-1 &&states[0]!=states[1] )
             // printf("Instruction fetched : %s\n",instructionRegister);
-            printf("Instruction fetched : %s\n",instructions[states[0]]);
+            {printf("Instruction fetched : %s\n",instructions[states[0]]);
+          
+           }
 
         if(states[1]!=-1 )
             printf("Instruction decoding : %s\n",instructions[states[1]]);
@@ -506,19 +533,29 @@ void execProgram(){
         if(states[5]!=-1 && states[5]!=states[6])
            printf("Instruction in Memory Access : %s\n",instructions[states[5]]);
 
-        if(states[6]!=-1 && states[5]==states[6])
+        if(states[6]!=-1 && states[5]==states[6] || states[5]==-1 && states[6]!=-1 )
              printf("Instruction in WriteBack stage : %s\n",instructions[states[6]]);
        
 
-       for(int i = 6; i > 0; i--) {
-            printf("states[%d] = %d\n", i, states[i]);
-        }
+    //    for(int i = 6; i > 0; i--) {
+    //         printf("states[%d] = %d\n", i, states[i]);
+    //     }
     //     printf("states[%d] = %d\n", 0, states[0]);
-        // printf("executeCycle : %d\n", executeCycle);
-        // printf("decodecycle: %d\n", decodecycle);
+  
+         //shift stages
          for(int i = 6; i > 0; i--) {
             states[i] = states[i-1];
         }
+         if(dispatch)
+            {
+                //flush
+                dispatch=0;
+                states[0]=-1;
+                states[1]=-1;
+                states[2]=-1;
+                states[3]=-1;
+                programCounter--;
+                }
          if( states[0]==-1 && states[1]==-1 && states[2]==-1 && states[3]==-1 && states[4]==-1 && states[5]==-1 ){
             printf("Breaked\n");
             break;
@@ -561,15 +598,12 @@ int main(){
     // int datasize=(sizeof(memory) / sizeof(memory[0]))/2;
 
     printf("Memory : \n");
-    for(int i = 0; i < 2048; i++) {
+    for(int i = 0; i < 20; i++) {
         // If the first character of the current string is not '\0', print it
-        if(memory[i][0] != '\0') {
+        
             printf("%d : %s, %s\n",i, instructions[i],memory[i]);
             
-        }
+        
     }
-   
-
-
-
+    return 0;
 }
