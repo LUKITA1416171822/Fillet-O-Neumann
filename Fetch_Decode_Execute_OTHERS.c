@@ -192,9 +192,9 @@ int binaryToDecimal(char *binary) {
         printf("reg1: %d\n",reg1);
         printf("reg2: %d\n",reg2);
 
-        char tempimm[(sizeof(imm)/sizeof(char)) + 1]; // One extra space for the null terminator
-        sprintf(tempimm, "0%s", imm);
-        strcpy(imm, tempimm);
+        // char tempimm[(sizeof(imm)/sizeof(char)) + 1]; // One extra space for the null terminator
+        // sprintf(tempimm, "0%s", imm);
+        // strcpy(imm, tempimm);
 
         printf("imm: %s\n",imm);
         imm_value=binaryToDecimal(imm);
