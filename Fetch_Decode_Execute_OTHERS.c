@@ -85,7 +85,7 @@ int binaryToDecimal(char *binary) {
         }
         else {
             // printf("entered Decode\n");
-        char opcode[5];
+        char opcode[5]="0000";
         strncpy(opcode, instructionRegister, 4);
         //opcode[5] = '\0'; // Ensure null-termination
         opcodeInt = strtol(opcode,NULL, 2);
@@ -179,7 +179,7 @@ int binaryToDecimal(char *binary) {
         char temp1[7]="00000";
         char temp2[7]="00000";
        char imm[19]="000000000000000000";
-
+       
         strncpy(temp1,instructionRegister+4,5);
         char temp[(sizeof(temp1)/sizeof(char)) + 1]; // One extra space for the null terminator
         sprintf(temp, "0%s", temp1);
@@ -197,9 +197,9 @@ int binaryToDecimal(char *binary) {
         printf("reg1: %d\n",reg1);
         printf("reg2: %d\n",reg2);
 
-        // char tempimm[(sizeof(imm)/sizeof(char)) + 1]; // One extra space for the null terminator
-        // sprintf(tempimm, "0%s", imm);
-        // strcpy(imm, tempimm);
+        char tempimm[(sizeof(imm)/sizeof(char)) + 1]; // One extra space for the null terminator
+        sprintf(tempimm, "0%s", imm);
+        strcpy(imm, tempimm);
 
         printf("imm: %s\n",imm);
         imm_value=binaryToDecimal(imm);
@@ -350,7 +350,7 @@ void execute(){
             printf("programCounter: %d\n",programCounter);
              // should be in write back stage ?
             dispatch=1;  
-            decodecycle=1;
+            // decodecycle=1;
                   
                 
                  
@@ -533,7 +533,7 @@ void execProgram(){
         if(states[5]!=-1 && states[5]!=states[6])
            printf("Instruction in Memory Access : %s\n",instructions[states[5]]);
 
-        if(states[6]!=-1 && states[5]==states[6] || states[5]==-1 && states[6]!=-1 )
+        if(states[6]!=-1 && states[5]==states[6] )
              printf("Instruction in WriteBack stage : %s\n",instructions[states[6]]);
        
 
@@ -546,6 +546,7 @@ void execProgram(){
          for(int i = 6; i > 0; i--) {
             states[i] = states[i-1];
         }
+        // states[6]=-1;
          if(dispatch)
             {
                 //flush
