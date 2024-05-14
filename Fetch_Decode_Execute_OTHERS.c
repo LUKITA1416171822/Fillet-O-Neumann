@@ -425,9 +425,9 @@ void execute(){
                     registers[temporayRegister]=writeBacktemp;
                 }//MOVM
                 else{
+                    printf("executecycle:%d \n",executeCycle);
                     printf("entered write back with dest:%d and res:%d\n",temporayRegister ,result);
                     registers[temporayRegister]=result;
-                    printf("Register %d value changed to %d \n",temporayRegister,registers[1]);
                 }
             writeBackOn=0;
             printf("Register %d value changed to %d \n",temporayRegister,registers[temporayRegister]);
@@ -480,7 +480,7 @@ void execProgram(){
            // printf("Memory access stage\n");
             
                 memoryAccess();}
-        if(states[4]!=-1 || states[3]!=-1){
+        if(states[3]!=-1){
             execute();
             
             //printf("Execute stage\n");
