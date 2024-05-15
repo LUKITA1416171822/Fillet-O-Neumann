@@ -213,15 +213,17 @@ int binaryToDecimal(char *binary) {
             if (writeBackOn)
             {
                 if(forwardedRegister==reg1)
-                {
+                {  
+                printf("reg1 forwaded register:%d\n",reg1);
                     reg1Value=forwardedValue;
+                    printf("entered forwarding reg1:%d\n",forwardedValue);
                 }
                 if(forwardedRegister==reg2)
-                {
+                {printf("entered forwarding reg2:%d\n",forwardedValue);
                     reg2Value=forwardedValue;
                 }
                 if(forwardedRegister==reg3)
-                {
+                {  
                     reg3Value=forwardedValue;
                 }
             }
@@ -291,10 +293,11 @@ void execute(){
         if(opcodeInt==4){  //exec of JEQ operation
             // int v1=registers[reg1];
             // int v2=registers[reg2];
-            printf("operand 1 = %d\n",registers[reg1]);
-            printf("operand 2 = %d\n",registers[reg2]);
+            printf("operand 1 JEQ = %d\n",reg1Value);
+            printf("operand 2 JEQ = %d\n",reg2Value);
             printf("Immediate value = %d\n",imm_value);
             if(reg1Value==reg2Value){
+                printf("entered change PC\n");
                 oldPc=programCounter;
                  programCounter=programCounter+imm_value-1;
                   //should this be in write back ?
@@ -391,7 +394,7 @@ void execute(){
 
         }
          if(opcodeInt==11){  //exec of MOVM operation
-            temporayRegister=reg1;
+            memoryDataRegister=registers[reg1];
             // int v2=registers[reg2];
             // int v3=imm_value;
             memoryAdressRegister=reg2Value+imm_value;
@@ -408,6 +411,12 @@ void execute(){
             if(writeBackOn){
         forwardedValue = result;
         forwardedRegister = temporayRegister;
+        if(opcodeInt==10)
+        {
+            forwardedValue = binaryToDecimal(memory[memoryAdressRegister]);
+            // forwardedRegister = temporayRegister;
+        }
+        
     }
             }
         }
@@ -425,8 +434,6 @@ void execute(){
                     registers[temporayRegister]=writeBacktemp;
                 }//MOVM
                 else{
-                    printf("executecycle:%d \n",executeCycle);
-                    printf("entered write back with dest:%d and res:%d\n",temporayRegister ,result);
                     registers[temporayRegister]=result;
                 }
             writeBackOn=0;
@@ -441,7 +448,7 @@ void execute(){
 //DECIDE UPON UPCODE TO READ OR WRITE
                 if(opcodetemp==11){
                     // printf("reg:%d, value:%d\n",temporayRegister,registers[temporayRegister]);
-                    intToBinary(registers[temporayRegister],memory[memoryAdressRegister],33);
+                    intToBinary(memoryDataRegister,memory[memoryAdressRegister],33);
                     printf("Value of Location %d in memory changed to %d \n",memoryAdressRegister,registers[temporayRegister]);
                     memoryAccessOn=0;
                 }
@@ -599,10 +606,10 @@ int main(){
     // int datasize=(sizeof(memory) / sizeof(memory[0]))/2;
 
     printf("Memory : \n");
-    for(int i = 0; i < 20; i++) {
+    for(int i = 1023 ; i < 2048 ; i++) {
         // If the first character of the current string is not '\0', print it
-        
-            printf("%d : %s, %s\n",i, instructions[i],memory[i]);
+             if(memory[i][0] != '\0'){
+            printf("%d : %s, %s\n",i, instructions[i],memory[i]);}
             
         
     }
