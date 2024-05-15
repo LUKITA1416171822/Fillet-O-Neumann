@@ -5,6 +5,9 @@
 #include "header/parse.h"
 int registers[32];
 int programCounter=0;
+int stall=0;
+int endStall=0;
+int printad=3;
 int memoryDataRegister;
 int memoryAdressRegister;
 int temporayRegister;//used to store register address preventing its writeback in execute
@@ -69,6 +72,7 @@ int binaryToDecimal(char *binary) {
 
     void fetch(){
         //in case of dispatch then just fetch old instruction as important remark
+        if(!stall){
         if(dispatch)
             {strcpy(instructionRegister,memory[oldPc]);
             states[0]=oldPc;
@@ -76,10 +80,11 @@ int binaryToDecimal(char *binary) {
         strcpy(instructionRegister,memory[programCounter]); 
         // printf("instructionRegister: %s\n",instructionRegister);
         states[0]=programCounter;
-    }
+    }}
 
     void decode(){
         //stall
+        if(!stall){
         if(decodecycle==1){
             decodecycle=0;
         }
@@ -233,7 +238,7 @@ int binaryToDecimal(char *binary) {
         }
         
 
-    }
+    }}
 
 
 void execute(){
@@ -413,7 +418,8 @@ void execute(){
         forwardedRegister = temporayRegister;
         if(opcodeInt==10)
         {
-            forwardedValue = binaryToDecimal(memory[memoryAdressRegister]);
+            stall=1;
+           // forwardedValue = binaryToDecimal(memory[memoryAdressRegister]);
             // forwardedRegister = temporayRegister;
         }
         
@@ -456,7 +462,7 @@ void execute(){
                  else if(opcodetemp==10){
                     char mem [sizeof(memory[memoryAdressRegister])/sizeof(char) +1];
                     strcpy(mem,memory[memoryAdressRegister]);
-
+                    endStall=1;
                     char tempmem[(sizeof(mem)/sizeof(char)) + 1]; // One extra space for the null terminator
                     sprintf(tempmem, "0%s", mem);
                     strcpy(mem, tempmem);
@@ -509,7 +515,7 @@ void execProgram(){
             fetch();
             // numberofinstructions--;
             //print
-           
+            if(!stall)
             programCounter++;
             }
             
@@ -544,15 +550,29 @@ void execProgram(){
              printf("Instruction in WriteBack stage : %s\n",instructions[states[6]]);
        
 
-    //    for(int i = 6; i > 0; i--) {
-    //         printf("states[%d] = %d\n", i, states[i]);
-    //     }
-    //     printf("states[%d] = %d\n", 0, states[0]);
+       for(int i = 6; i > 0; i--) {
+            printf("states[%d] = %d\n", i, states[i]);
+        }
+        printf("states[%d] = %d\n", 0, states[0]);
   
          //shift stages
-         for(int i = 6; i > 0; i--) {
+         if(!stall){
+         for(int i = 6; i > 0; i--) 
             states[i] = states[i-1];
         }
+        else{
+            for(int i=6;i>3;i--)
+            states[i]=states[i-1];
+            states[printad]=-1;
+            printad++;
+            if (endStall){
+                stall=0;
+                endStall=0;
+                printad=3;
+            }
+            
+        }
+
         // states[6]=-1;
          if(dispatch)
             {
