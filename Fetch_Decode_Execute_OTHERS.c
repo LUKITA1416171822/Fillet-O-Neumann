@@ -394,7 +394,7 @@ void execute(){
 
         }
          if(opcodeInt==11){  //exec of MOVM operation
-            memoryDataRegister=registers[reg1];
+            reg1Value=registers[reg1];
             // int v2=registers[reg2];
             // int v3=imm_value;
             memoryAdressRegister=reg2Value+imm_value;
@@ -411,12 +411,7 @@ void execute(){
             if(writeBackOn){
         forwardedValue = result;
         forwardedRegister = temporayRegister;
-        if(opcodeInt==10)
-        {
-            forwardedValue = binaryToDecimal(memory[memoryAdressRegister]);
-            // forwardedRegister = temporayRegister;
-        }
-        
+       
     }
             }
         }
@@ -448,7 +443,7 @@ void execute(){
 //DECIDE UPON UPCODE TO READ OR WRITE
                 if(opcodetemp==11){
                     // printf("reg:%d, value:%d\n",temporayRegister,registers[temporayRegister]);
-                    intToBinary(memoryDataRegister,memory[memoryAdressRegister],33);
+                    intToBinary(reg1Value,memory[memoryAdressRegister],33);
                     printf("Value of Location %d in memory changed to %d \n",memoryAdressRegister,registers[temporayRegister]);
                     memoryAccessOn=0;
                 }
