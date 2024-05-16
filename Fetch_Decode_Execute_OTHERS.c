@@ -442,7 +442,7 @@ void execute(){
 
 void execProgram(){
     parse();
-    for(int i = 0; i < 20; i++) 
+    for(int i = 0; i < 2048; i++) 
         if(memory[i][0] != '\0')
             numberofinstructions++;
     
