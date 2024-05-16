@@ -210,23 +210,7 @@ int binaryToDecimal(char *binary) {
 
             decodecycle=1;
             //forward correct values if needed to avoid hazards
-            if (writeBackOn)
-            {
-                if(forwardedRegister==reg1)
-                {  
-                printf("reg1 forwaded register:%d\n",reg1);
-                    reg1Value=forwardedValue;
-                    printf("entered forwarding reg1:%d\n",forwardedValue);
-                }
-                if(forwardedRegister==reg2)
-                {printf("entered forwarding reg2:%d\n",forwardedValue);
-                    reg2Value=forwardedValue;
-                }
-                if(forwardedRegister==reg3)
-                {  
-                    reg3Value=forwardedValue;
-                }
-            }
+            
             
             strcpy(executeInstruction,instructionRegister); 
             
@@ -310,8 +294,8 @@ void execute(){
         }
 
         if(opcodeInt==5){  //exec of and operation
-            int v1=registers[reg2];
-            int v2=registers[reg3];
+            // int v1=registers[reg2];
+            // int v2=registers[reg3];
             result=reg2Value&reg3Value;
             temporayRegister=reg1; 
             writeBackOn=1;
@@ -323,8 +307,8 @@ void execute(){
         
 
         if(opcodeInt==6){  //exec of XORI operation
-            int v1=registers[reg2];
-            int v2=imm_value;
+            // int v1=registers[reg2];
+            // int v2=imm_value;
             result=reg2Value^imm_value;
            
             temporayRegister=reg1; 
@@ -394,7 +378,7 @@ void execute(){
 
         }
          if(opcodeInt==11){  //exec of MOVM operation
-            reg1Value=registers[reg1];
+            memoryDataRegister=reg1Value;
             // int v2=registers[reg2];
             // int v3=imm_value;
             memoryAdressRegister=reg2Value+imm_value;
@@ -408,11 +392,6 @@ void execute(){
         // printf("result: %d\n",reg1);
         opcodetemp=opcodeInt;
             executeCycle=1;
-            if(writeBackOn){
-        forwardedValue = result;
-        forwardedRegister = temporayRegister;
-       
-    }
             }
         }
  
@@ -443,7 +422,7 @@ void execute(){
 //DECIDE UPON UPCODE TO READ OR WRITE
                 if(opcodetemp==11){
                     // printf("reg:%d, value:%d\n",temporayRegister,registers[temporayRegister]);
-                    intToBinary(reg1Value,memory[memoryAdressRegister],33);
+                    intToBinary(memoryDataRegister,memory[memoryAdressRegister],33);
                     printf("Value of Location %d in memory changed to %d \n",memoryAdressRegister,registers[temporayRegister]);
                     memoryAccessOn=0;
                 }
