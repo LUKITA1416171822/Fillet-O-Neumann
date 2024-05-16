@@ -215,23 +215,7 @@ int binaryToDecimal(char *binary) {
 
             decodecycle=1;
             //forward correct values if needed to avoid hazards
-            if (writeBackOn)
-            {
-                if(forwardedRegister==reg1)
-                {  
-                printf("reg1 forwaded register:%d\n",reg1);
-                    reg1Value=forwardedValue;
-                    printf("entered forwarding reg1:%d\n",forwardedValue);
-                }
-                if(forwardedRegister==reg2)
-                {printf("entered forwarding reg2:%d\n",forwardedValue);
-                    reg2Value=forwardedValue;
-                }
-                if(forwardedRegister==reg3)
-                {  
-                    reg3Value=forwardedValue;
-                }
-            }
+            
             
             strcpy(executeInstruction,instructionRegister); 
             
@@ -245,7 +229,23 @@ void execute(){
     //stall
     if(executeCycle==1)
         executeCycle=0;
-    else {
+    else {if (writeBackOn || memoryAccessOn)
+            {
+                if(forwardedRegister==reg1)
+                {  
+                    reg1Value=forwardedValue;
+                    printf("entered forwarding reg1:%d\n",forwardedValue);
+                }
+                if(forwardedRegister==reg2 )
+                {printf("entered forwarding reg2:%d\n",forwardedValue);
+                    reg2Value=forwardedValue;
+                }
+                if(forwardedRegister==reg3)
+                {  
+                    reg3Value=forwardedValue;
+                }
+                 writeBackOn=0;
+            }
         if(opcodeInt==0){  //exec of add operation
      
             printf("operand 1 = %d\n",reg2Value);
@@ -253,7 +253,7 @@ void execute(){
             printf("destination register = %d\n",reg1);
             result=reg2Value+reg3Value;
             temporayRegister=reg1;
-       printf("entered exec with dest:%d\n",temporayRegister);
+            printf("entered exec with dest:%d\n",temporayRegister);
             writeBackOn=1;//correct??
            
 
@@ -416,9 +416,10 @@ void execute(){
             if(writeBackOn){
         forwardedValue = result;
         forwardedRegister = temporayRegister;
-        if(opcodeInt==10)
+        if(opcodeInt==11 ||  memoryAccessOn)
         {
-            stall=1;
+            forwardedValue=memoryDataRegister;
+        
            // forwardedValue = binaryToDecimal(memory[memoryAdressRegister]);
             // forwardedRegister = temporayRegister;
         }
@@ -431,7 +432,6 @@ void execute(){
             
             if(states[5]==states[6]){
             if(temporayRegister==0){
-                writeBackOn=0;
                 return;
             }
 
@@ -442,7 +442,7 @@ void execute(){
                 else{
                     registers[temporayRegister]=result;
                 }
-            writeBackOn=0;
+           
             printf("Register %d value changed to %d \n",temporayRegister,registers[temporayRegister]);
             
         }}
@@ -474,7 +474,7 @@ void execute(){
 
 void execProgram(){
     parse();
-    for(int i = 0; i < 20; i++) 
+    for(int i = 0; i < 2048; i++) 
         if(memory[i][0] != '\0')
             numberofinstructions++;
     
