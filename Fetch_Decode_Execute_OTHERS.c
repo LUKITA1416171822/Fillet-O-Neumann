@@ -196,14 +196,7 @@ int binaryToDecimal(char *binary) {
         
         reg1=binaryToDecimal(temp1);
         reg2=binaryToDecimal(temp2);
-        printf("reg1: %d\n",reg1);
-        printf("reg2: %d\n",reg2);
-
-        // char tempimm[(sizeof(imm)/sizeof(char)) + 1]; // One extra space for the null terminator
-        // sprintf(tempimm, "0%s", imm);
-        // strcpy(imm, tempimm);
-
-        printf("imm: %s\n",imm);
+   
         imm_value=binaryToDecimal(imm);
         reg1Value=registers[reg1];
         reg2Value=registers[reg2];
@@ -226,22 +219,7 @@ void execute(){
     //stall
     if(executeCycle==1)
         executeCycle=0;
-    else {if (writeBackOn || memoryAccessOn)
-            {
-                if(forwardedRegister==reg1)
-                {     
-                    reg1Value=forwardedValue;
-    
-                }
-                if(forwardedRegister==reg2 )
-                {
-                    reg2Value=forwardedValue;
-                }
-                if(forwardedRegister==reg3)
-                {  
-                    reg3Value=forwardedValue;
-                }
-            }
+    else {
         if(opcodeInt==0){  //exec of add operation
      
             printf("operand 1 = %d\n",reg2Value);
@@ -258,8 +236,8 @@ void execute(){
         if(opcodeInt==1){  //exec of sub operation
             // int v1=registers[reg2];
             // int v2=registers[reg3];//why immediate not r3
-            printf("operand 1 = %d\n",registers[reg2]);
-            printf("operand 2 = %d\n",registers[reg3]);
+            printf("operand 1 = %d\n",reg2Value);
+            printf("operand 2 = %d\n",reg3Value);
             printf("destination register = %d\n",reg1);
             result=reg2Value-reg3Value;
             temporayRegister=reg1;
@@ -271,8 +249,8 @@ void execute(){
         if(opcodeInt==2){  //exec of mul operation
             // int v1=registers[reg2];
             // int v2=registers[reg3];
-            printf("operand 1 = %d\n",registers[reg2]);
-            printf("operand 2 = %d\n",registers[reg3]);
+            printf("operand 1 = %d\n",reg2Value);
+            printf("operand 2 = %d\n",reg3Value);
             printf("destination register = %d\n",reg1);
             result=reg2Value*reg3Value;
             temporayRegister=reg1;
@@ -316,8 +294,8 @@ void execute(){
             result=reg2Value&reg3Value;
             temporayRegister=reg1; 
             writeBackOn=1;
-            printf("operand 1 = %d\n",registers[reg2]);
-            printf("operand 2 = %d\n",registers[reg3]);
+            printf("operand 1 = %d\n",reg2Value);
+            printf("operand 2 = %d\n",reg2Value);
             printf("destination register = %d\n",reg1);
           
         }
@@ -329,7 +307,7 @@ void execute(){
             result=reg2Value^imm_value;
            
             temporayRegister=reg1; 
-            printf("operand 1 = %d\n",registers[reg2]);
+            printf("operand 1 = %d\n",reg2Value);
             printf("operand 2 = %d\n",imm_value);
             printf("destination register = %d\n",reg1);
             writeBackOn=1;
@@ -364,7 +342,7 @@ void execute(){
            result=reg2Value<<shamt;
            temporayRegister=reg1;  
            writeBackOn=1;
-           printf("operand 1 = %d\n",registers[reg2]);
+           printf("operand 1 = %d\n",reg2Value);
             printf("shift amount = %d\n",shamt);
             printf("destination register = %d\n",reg1);
            
@@ -374,7 +352,7 @@ void execute(){
             result=reg2Value>>shamt;
             temporayRegister=reg1;
             writeBackOn=1;
-            printf("operand 1 = %d\n",registers[reg2]);
+            printf("operand 1 = %d\n",reg2Value);
             printf("shift amount = %d\n",shamt);
             printf("destination register = %d",reg1);
             
@@ -395,13 +373,13 @@ void execute(){
 
         }
          if(opcodeInt==11){  //exec of MOVM operation
-            memoryDataRegister=registers[reg1];
+            memoryDataRegister=reg1Value;
             // int v2=registers[reg2];
             // int v3=imm_value;
             memoryAdressRegister=reg2Value+imm_value;
             memoryAccessOn=1;
             // writeBackOn=1;
-            printf("operand 1 = %d\n",registers[reg1]);
+            printf("operand 1 = %d\n",reg1Value);
             printf("memoryAddressRegister = %d\n",memoryAdressRegister);
             
         }
@@ -467,7 +445,7 @@ void execute(){
 
 void execProgram(){
     parse();
-    for(int i = 0; i < 2048; i++) 
+    for(int i = 0; i < 1024; i++) 
         if(memory[i][0] != '\0')
             numberofinstructions++;
     
@@ -543,10 +521,10 @@ void execProgram(){
              printf("Instruction in WriteBack stage : %s\n",instructions[states[6]]);
        
 
-       for(int i = 6; i > 0; i--) {
-            printf("states[%d] = %d\n", i, states[i]);
-        }
-        printf("states[%d] = %d\n", 0, states[0]);
+    //    for(int i = 6; i > 0; i--) {
+    //         printf("states[%d] = %d\n", i, states[i]);
+    //     }
+    //     printf("states[%d] = %d\n", 0, states[0]);
   
          //shift stages
         
@@ -602,7 +580,7 @@ int main(){
     
 
     printf("Memory : \n");
-    for(int i = 1023 ; i < 2048 ; i++) {
+    for(int i = 0 ; i < 2048 ; i++) {
         // If the first character of the current string is not '\0', print it
              if(memory[i][0] != '\0'){
             printf("%d : %s, %s\n",i, instructions[i],memory[i]);}
