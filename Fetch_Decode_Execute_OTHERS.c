@@ -69,6 +69,7 @@ int binaryToDecimal(char *binary) {
 
     void fetch(){
         //in case of dispatch then just fetch old instruction as important remark
+        
         if(dispatch)
             {strcpy(instructionRegister,memory[oldPc]);
             states[0]=oldPc;
@@ -80,6 +81,7 @@ int binaryToDecimal(char *binary) {
 
     void decode(){
         //stall
+       
         if(decodecycle==1){
             decodecycle=0;
         }
@@ -197,6 +199,10 @@ int binaryToDecimal(char *binary) {
         printf("reg1: %d\n",reg1);
         printf("reg2: %d\n",reg2);
 
+        // char tempimm[(sizeof(imm)/sizeof(char)) + 1]; // One extra space for the null terminator
+        // sprintf(tempimm, "0%s", imm);
+        // strcpy(imm, tempimm);
+
         printf("imm: %s\n",imm);
         imm_value=binaryToDecimal(imm);
         reg1Value=registers[reg1];
@@ -220,7 +226,22 @@ void execute(){
     //stall
     if(executeCycle==1)
         executeCycle=0;
-    else {
+    else {if (writeBackOn || memoryAccessOn)
+            {
+                if(forwardedRegister==reg1)
+                {     
+                    reg1Value=forwardedValue;
+    
+                }
+                if(forwardedRegister==reg2 )
+                {
+                    reg2Value=forwardedValue;
+                }
+                if(forwardedRegister==reg3)
+                {  
+                    reg3Value=forwardedValue;
+                }
+            }
         if(opcodeInt==0){  //exec of add operation
      
             printf("operand 1 = %d\n",reg2Value);
@@ -290,8 +311,8 @@ void execute(){
         }
 
         if(opcodeInt==5){  //exec of and operation
-            // int v1=registers[reg2];
-            // int v2=registers[reg3];
+            int v1=registers[reg2];
+            int v2=registers[reg3];
             result=reg2Value&reg3Value;
             temporayRegister=reg1; 
             writeBackOn=1;
@@ -303,8 +324,8 @@ void execute(){
         
 
         if(opcodeInt==6){  //exec of XORI operation
-            // int v1=registers[reg2];
-            // int v2=imm_value;
+            int v1=registers[reg2];
+            int v2=imm_value;
             result=reg2Value^imm_value;
            
             temporayRegister=reg1; 
@@ -374,7 +395,7 @@ void execute(){
 
         }
          if(opcodeInt==11){  //exec of MOVM operation
-            memoryDataRegister=reg1Value;
+            memoryDataRegister=registers[reg1];
             // int v2=registers[reg2];
             // int v3=imm_value;
             memoryAdressRegister=reg2Value+imm_value;
@@ -388,6 +409,16 @@ void execute(){
         // printf("result: %d\n",reg1);
         opcodetemp=opcodeInt;
             executeCycle=1;
+            if(writeBackOn){
+        forwardedValue = result;
+        forwardedRegister = temporayRegister;
+        if(opcodeInt==11 ||  memoryAccessOn)
+        {
+            forwardedValue=memoryDataRegister;
+  
+        }
+        
+    }
             }
         }
  
@@ -426,11 +457,9 @@ void execute(){
                  else if(opcodetemp==10){
                     char mem [sizeof(memory[memoryAdressRegister])/sizeof(char) +1];
                     strcpy(mem,memory[memoryAdressRegister]);
-
                     char tempmem[(sizeof(mem)/sizeof(char)) + 1]; // One extra space for the null terminator
                     sprintf(tempmem, "0%s", mem);
                     strcpy(mem, tempmem);
-
                     writeBacktemp=binaryToDecimal(mem);
                     memoryAccessOn=0;
         }
@@ -479,7 +508,7 @@ void execProgram(){
             fetch();
             // numberofinstructions--;
             //print
-           
+
             programCounter++;
             }
             
@@ -514,15 +543,17 @@ void execProgram(){
              printf("Instruction in WriteBack stage : %s\n",instructions[states[6]]);
        
 
-    //    for(int i = 6; i > 0; i--) {
-    //         printf("states[%d] = %d\n", i, states[i]);
-    //     }
-    //     printf("states[%d] = %d\n", 0, states[0]);
+       for(int i = 6; i > 0; i--) {
+            printf("states[%d] = %d\n", i, states[i]);
+        }
+        printf("states[%d] = %d\n", 0, states[0]);
   
          //shift stages
-         for(int i = 6; i > 0; i--) {
+        
+         for(int i = 6; i > 0; i--) 
             states[i] = states[i-1];
-        }
+        
+
         // states[6]=-1;
          if(dispatch)
             {
@@ -539,9 +570,7 @@ void execProgram(){
             break;
         }
 
-    //     for(int i = 0; i < 31; i++) {
-    //     printf("registers 0= %i\n", i, registers[i]);
-    // }
+
         }
 
        
@@ -571,9 +600,6 @@ int main(){
     }
     printf("Program Counter = %d\n\n",programCounter);
     
-    // int instruction_size = (sizeof(memory) / sizeof(memory[0]))/2;
-    // printf("%d\n",instruction_size);
-    // int datasize=(sizeof(memory) / sizeof(memory[0]))/2;
 
     printf("Memory : \n");
     for(int i = 1023 ; i < 2048 ; i++) {
