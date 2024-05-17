@@ -373,7 +373,7 @@ void execute(){
             writeBackOn=1;
             printf("operand 1 = %d\n",reg2Value);
             printf("shift amount = %d\n",shamt);
-            printf("destination register = %d",reg1);
+            printf("destination register = %d\n",reg1);
             
         }
 
@@ -387,7 +387,7 @@ void execute(){
             // printf("operand 1 = %d\n",registers[reg2]);
             // printf("immediate value = %d\n",imm_value);
             printf("memoryAddressRegister = %d\n",memoryAdressRegister);
-            printf("destination register = %d",reg1);
+            printf("destination register = %d\n",reg1);
 
 
         }
@@ -464,7 +464,7 @@ void execute(){
 
 void execProgram(){
     parse();
-    for(int i = 0; i < 2048; i++) 
+    for(int i = 0; i < 1024; i++) 
         if(memory[i][0] != '\0')
             numberofinstructions++;
     
